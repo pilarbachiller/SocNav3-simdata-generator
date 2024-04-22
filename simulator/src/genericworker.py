@@ -20,6 +20,7 @@
 
 import sys, Ice, os
 
+current_dir = os.path.dirname(__file__)
 ROBOCOMP = ''
 try:
 	ROBOCOMP = os.environ['ROBOCOMP']
@@ -27,11 +28,11 @@ except KeyError:
 	print('$ROBOCOMP environment variable not set, using the default value /opt/robocomp')
 	ROBOCOMP = '/opt/robocomp'
 
-preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ --all /opt/robocomp/interfaces/"
-Ice.loadSlice(preStr+"CommonBehavior.ice")
+preStr = "-I"+current_dir#+" -I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ --all /opt/robocomp/interfaces/"
+Ice.loadSlice(preStr+" "+os.path.join(current_dir,"CommonBehavior.ice"))
 import RoboCompCommonBehavior
 
-additionalPathStr = ''
+additionalPathStr = current_dir#''
 icePaths = [ '/opt/robocomp/interfaces' ]
 try:
 	SLICE_PATH = os.environ['SLICE_PATH'].split(':')
