@@ -36,7 +36,7 @@ import _pickle as pickle
 
 from collections import namedtuple
 
-sys.path.append(os.path.join(os.path.dirname(__file__),'../../../../SocNavGym'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../../SocNavGym'))
 import socnavgym
 import gym
 

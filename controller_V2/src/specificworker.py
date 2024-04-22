@@ -50,11 +50,12 @@ from PySide2.QtWidgets import (QLabel, QLineEdit, QPushButton, QApplication,
     QVBoxLayout, QDialog, QWidget)
 from ui_configuration import *
 
-sys.path.append(os.path.join(os.path.dirname(__file__),'../../..'))
-sys.path.append(os.path.join(os.path.dirname(__file__),'../../../nets'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../../SNGNN2D-v2/utils'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../../SNGNN2D-v2/nets'))
+sys.path.append(os.path.join(os.path.dirname(__file__),'../../../SNGNN2D-v2/dataset'))
 
 from socnav2d_V2_API import *
-from socnav2d import *
+from socnav2d_dataset import *
 
 print('packages imported')
 
@@ -74,7 +75,7 @@ class SpecificWorker(GenericWorker):
         os.system('bash ../simulator_V2.sh &')
         self.timer.timeout.connect(self.compute)
 
-        self.sngnn = SocNavAPI(base = '../../model_params/pix2pix', device = 'cuda')
+        self.sngnn = SocNavAPI(base = '../../SNGNN2D-v2/model', device = 'cuda')
 
         self.img_mutex = threading.RLock()
         self.img = None
