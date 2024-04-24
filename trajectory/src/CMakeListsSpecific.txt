@@ -1,12 +1,14 @@
 
 # Sources set
 SET ( SOURCES
+  genericworker.cpp
   specificworker.cpp
   specificmonitor.cpp
 )
 
 # Headers set
 SET ( HEADERS
+  genericworker.h
   specificworker.h
   specificmonitor.h
 )

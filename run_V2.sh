@@ -1,4 +1,6 @@
-rcnode &
+cd rcnode
+sh rcnode.sh &
+cd ..
 
 export SLICE_PATH=${PWD}/interfaces
 export PYTHONPATH=${PWD}/python:$PYTHONPATH

@@ -21,7 +21,7 @@
 
 #include "config.h"
 #include <stdint.h>
-#include <qlog/qlog.h>
+// #include <qlog/qlog.h>
 #include <CommonBehavior.h>
 
 #include <GenericBase.h>
