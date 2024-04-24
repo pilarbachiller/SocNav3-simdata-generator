@@ -278,7 +278,7 @@ class SpecificWorker(GenericWorker):
             self.external_reset = False
         else:
 
-            graph = SocNavDataset(self.updates_list, mode='test', raw_dir='', alt='8', debug=True, device = 'cuda')
+            graph = SocNavDataset(self.updates_list, net='gat', mode='test', raw_dir='', alt='8', debug=True, device = 'cuda')
 
             estimation = self.sngnn.predictOneGraph(graph)[0]
             
