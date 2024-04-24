@@ -29,7 +29,7 @@ if len(ROBOCOMP)<1:
     raise RuntimeError('ROBOCOMP environment variable not set! Exiting.')
 
 
-Ice.loadSlice("-I ./src/ --all ./src/GoalPublisher.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/GoalPublisher.ice")
 
 from RoboCompGoalPublisher import *
 

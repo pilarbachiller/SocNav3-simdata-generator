@@ -29,7 +29,7 @@ if len(ROBOCOMP)<1:
     raise RuntimeError('ROBOCOMP environment variable not set! Exiting.')
 
 
-Ice.loadSlice("-I ./src/ --all ./src/ByteSequencePublisher.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ByteSequencePublisher.ice")
 
 from RoboCompByteSequencePublisher import *
 

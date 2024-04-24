@@ -29,7 +29,7 @@ if len(ROBOCOMP)<1:
     raise RuntimeError('ROBOCOMP environment variable not set! Exiting.')
 
 
-Ice.loadSlice("-I ./src/ --all ./src/WallDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/WallDetector.ice")
 
 from RoboCompWallDetector import *
 

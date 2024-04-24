@@ -28,145 +28,172 @@ except KeyError:
 	print('$ROBOCOMP environment variable not set, using the default value /opt/robocomp')
 	ROBOCOMP = '/opt/robocomp'
 
-preStr = "-I"+current_dir#+" -I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ --all /opt/robocomp/interfaces/"
-Ice.loadSlice(preStr+" "+os.path.join(current_dir,"CommonBehavior.ice"))
+
+Ice.loadSlice("-I ../interfaces --all ../interfaces/CommonBehavior.ice")
 import RoboCompCommonBehavior
 
-additionalPathStr = current_dir#''
-icePaths = [ '/opt/robocomp/interfaces' ]
-try:
-	SLICE_PATH = os.environ['SLICE_PATH'].split(':')
-	for p in SLICE_PATH:
-		icePaths.append(p)
-		additionalPathStr += ' -I' + p + ' '
-	icePaths.append('/opt/robocomp/interfaces')
-except:
-	print('SLICE_PATH environment variable was not exported. Using only the default paths')
-	pass
-
-ice_OmniRobot = False
-for p in icePaths:
-	if os.path.isfile(p+'/OmniRobot.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"OmniRobot.ice"
-		Ice.loadSlice(wholeStr)
-		ice_OmniRobot = True
-		break
-if not ice_OmniRobot:
-	print('Couln\'t load OmniRobot')
-	sys.exit(-1)
-from RoboCompOmniRobot import *
-ice_Simulator = False
-for p in icePaths:
-	if os.path.isfile(p+'/Simulator.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"Simulator.ice"
-		Ice.loadSlice(wholeStr)
-		ice_Simulator = True
-		break
-if not ice_Simulator:
-	print('Couln\'t load Simulator')
-	sys.exit(-1)
-from RoboCompSimulator import *
-ice_PeopleDetector = False
-for p in icePaths:
-	if os.path.isfile(p+'/PeopleDetector.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"PeopleDetector.ice"
-		Ice.loadSlice(wholeStr)
-		ice_PeopleDetector = True
-		break
-if not ice_PeopleDetector:
-	print('Couln\'t load PeopleDetector')
-	sys.exit(-1)
-from RoboCompPeopleDetector import *
-
-
-ice_ObjectDetector = False
-for p in icePaths:
-	if os.path.isfile(p+'/ObjectDetector.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"ObjectDetector.ice"
-		Ice.loadSlice(wholeStr)
-		ice_ObjectDetector = True
-		break
-if not ice_ObjectDetector:
-	print('Couln\'t load ObjectDetector')
-	sys.exit(-1)
-from RoboCompObjectDetector import *
-
-
-ice_InteractionDetector = False
-for p in icePaths:
-	if os.path.isfile(p+'/InteractionDetector.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"InteractionDetector.ice"
-		Ice.loadSlice(wholeStr)
-		ice_InteractionDetector = True
-		break
-if not ice_InteractionDetector:
-	print('Couln\'t load InteractionDetector')
-	sys.exit(-1)
-from RoboCompInteractionDetector import *
-
-
-ice_WallDetector = False
-for p in icePaths:
-	if os.path.isfile(p+'/WallDetector.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"WallDetector.ice"
-		Ice.loadSlice(wholeStr)
-		ice_WallDetector = True
-		break
-if not ice_WallDetector:
-	print('Couln\'t load WallDetector')
-	sys.exit(-1)
-from RoboCompWallDetector import *
-
-
-
-
-ice_ByteSequencePublisher = False
-for p in icePaths:
-	if os.path.isfile(p+'/ByteSequencePublisher.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"ByteSequencePublisher.ice"
-		Ice.loadSlice(wholeStr)
-		ice_ByteSequencePublisher = True
-		break
-if not ice_ByteSequencePublisher:
-	print('Couln\'t load ByteSequencePublisher')
-	sys.exit(-1)
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ByteSequencePublisher.ice")
 from RoboCompByteSequencePublisher import *
-
-ice_GoalPublisher = False
-for p in icePaths:
-	if os.path.isfile(p+'/GoalPublisher.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"GoalPublisher.ice"
-		Ice.loadSlice(wholeStr)
-		ice_GoalPublisher = True
-		break
-if not ice_GoalPublisher:
-	print('Couln\'t load GoalPublisher')
-	sys.exit(-1)
+Ice.loadSlice("-I ./src/ --all ./src/GenericBase.ice")
+import RoboCompGenericBase
+Ice.loadSlice("-I ../interfaces --all ../interfaces/GoalPublisher.ice")
 from RoboCompGoalPublisher import *
+Ice.loadSlice("-I ../interfaces --all ../interfaces/InteractionDetector.ice")
+from RoboCompInteractionDetector import *
+# Ice.loadSlice("-I ../interfaces --all ../interfaces/JoystickAdapter.ice")
+# import RoboCompJoystickAdapter
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ObjectDetector.ice")
+from RoboCompObjectDetector import *
+Ice.loadSlice("-I ../interfaces --all ../interfaces/OmniRobot.ice")
+import RoboCompOmniRobot
+Ice.loadSlice("-I ../interfaces --all ../interfaces/PeopleDetector.ice")
+from RoboCompPeopleDetector import *
+Ice.loadSlice("-I ../interfaces --all ../interfaces/Simulator.ice")
+import RoboCompSimulator
+Ice.loadSlice("-I ../interfaces --all ../interfaces/WallDetector.ice")
+from RoboCompWallDetector import *
+Ice.loadSlice("-I ../interfaces --all ../interfaces/SNGNN2D.ice")
+from RoboCompSNGNN2D import *	
+
+# preStr = "-I"+current_dir#+" -I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ --all /opt/robocomp/interfaces/"
+# Ice.loadSlice(preStr+" "+os.path.join(current_dir,"CommonBehavior.ice"))
+# import RoboCompCommonBehavior
+
+# additionalPathStr = current_dir#''
+# icePaths = [ '/opt/robocomp/interfaces' ]
+# try:
+# 	SLICE_PATH = os.environ['SLICE_PATH'].split(':')
+# 	for p in SLICE_PATH:
+# 		icePaths.append(p)
+# 		additionalPathStr += ' -I' + p + ' '
+# 	icePaths.append('/opt/robocomp/interfaces')
+# except:
+# 	print('SLICE_PATH environment variable was not exported. Using only the default paths')
+# 	pass
+
+# ice_OmniRobot = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/OmniRobot.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"OmniRobot.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_OmniRobot = True
+# 		break
+# if not ice_OmniRobot:
+# 	print('Couln\'t load OmniRobot')
+# 	sys.exit(-1)
+# from RoboCompOmniRobot import *
+# ice_Simulator = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/Simulator.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"Simulator.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_Simulator = True
+# 		break
+# if not ice_Simulator:
+# 	print('Couln\'t load Simulator')
+# 	sys.exit(-1)
+# from RoboCompSimulator import *
+# ice_PeopleDetector = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/PeopleDetector.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"PeopleDetector.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_PeopleDetector = True
+# 		break
+# if not ice_PeopleDetector:
+# 	print('Couln\'t load PeopleDetector')
+# 	sys.exit(-1)
+# from RoboCompPeopleDetector import *
+
+
+# ice_ObjectDetector = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/ObjectDetector.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"ObjectDetector.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_ObjectDetector = True
+# 		break
+# if not ice_ObjectDetector:
+# 	print('Couln\'t load ObjectDetector')
+# 	sys.exit(-1)
+# from RoboCompObjectDetector import *
+
+
+# ice_InteractionDetector = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/InteractionDetector.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"InteractionDetector.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_InteractionDetector = True
+# 		break
+# if not ice_InteractionDetector:
+# 	print('Couln\'t load InteractionDetector')
+# 	sys.exit(-1)
+# from RoboCompInteractionDetector import *
+
+
+# ice_WallDetector = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/WallDetector.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"WallDetector.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_WallDetector = True
+# 		break
+# if not ice_WallDetector:
+# 	print('Couln\'t load WallDetector')
+# 	sys.exit(-1)
+# from RoboCompWallDetector import *
 
 
 
 
-ice_GenericBase = False
-for p in icePaths:
-	if os.path.isfile(p+'/GenericBase.ice'):
-		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
-		wholeStr = preStr+"GenericBase.ice"
-		Ice.loadSlice(wholeStr)
-		ice_GenericBase = True
-		break
-if not ice_GenericBase:
-	print('Couln\'t load GenericBase')
-	sys.exit(-1)
-from RoboCompGenericBase import *
+# ice_ByteSequencePublisher = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/ByteSequencePublisher.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"ByteSequencePublisher.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_ByteSequencePublisher = True
+# 		break
+# if not ice_ByteSequencePublisher:
+# 	print('Couln\'t load ByteSequencePublisher')
+# 	sys.exit(-1)
+# from RoboCompByteSequencePublisher import *
+
+# ice_GoalPublisher = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/GoalPublisher.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"GoalPublisher.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_GoalPublisher = True
+# 		break
+# if not ice_GoalPublisher:
+# 	print('Couln\'t load GoalPublisher')
+# 	sys.exit(-1)
+# from RoboCompGoalPublisher import *
+
+
+
+
+# ice_GenericBase = False
+# for p in icePaths:
+# 	if os.path.isfile(p+'/GenericBase.ice'):
+# 		preStr = "-I/opt/robocomp/interfaces/ -I"+ROBOCOMP+"/interfaces/ " + additionalPathStr + " --all "+p+'/'
+# 		wholeStr = preStr+"GenericBase.ice"
+# 		Ice.loadSlice(wholeStr)
+# 		ice_GenericBase = True
+# 		break
+# if not ice_GenericBase:
+# 	print('Couln\'t load GenericBase')
+# 	sys.exit(-1)
+# from RoboCompGenericBase import *
 
 
 from omnirobotI import *

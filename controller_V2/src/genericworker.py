@@ -28,30 +28,30 @@ except KeyError:
     print('$ROBOCOMP environment variable not set, using the default value /opt/robocomp')
     ROBOCOMP = '/opt/robocomp'
 
-Ice.loadSlice("-I ./src/ --all ./src/CommonBehavior.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/CommonBehavior.ice")
 import RoboCompCommonBehavior
 
-Ice.loadSlice("-I ./src/ --all ./src/ByteSequencePublisher.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ByteSequencePublisher.ice")
 import RoboCompByteSequencePublisher
-Ice.loadSlice("-I ./src/ --all ./src/GenericBase.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/GenericBase.ice")
 import RoboCompGenericBase
-Ice.loadSlice("-I ./src/ --all ./src/GoalPublisher.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/GoalPublisher.ice")
 import RoboCompGoalPublisher
-Ice.loadSlice("-I ./src/ --all ./src/InteractionDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/InteractionDetector.ice")
 import RoboCompInteractionDetector
-Ice.loadSlice("-I ./src/ --all ./src/JoystickAdapter.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/JoystickAdapter.ice")
 import RoboCompJoystickAdapter
-Ice.loadSlice("-I ./src/ --all ./src/ObjectDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ObjectDetector.ice")
 import RoboCompObjectDetector
-Ice.loadSlice("-I ./src/ --all ./src/OmniRobot.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/OmniRobot.ice")
 import RoboCompOmniRobot
-Ice.loadSlice("-I ./src/ --all ./src/PeopleDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/PeopleDetector.ice")
 import RoboCompPeopleDetector
-Ice.loadSlice("-I ./src/ --all ./src/Simulator.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/Simulator.ice")
 import RoboCompSimulator
-Ice.loadSlice("-I ./src/ --all ./src/WallDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/WallDetector.ice")
 import RoboCompWallDetector
-Ice.loadSlice("-I ./src/ --all ./src/SNGNN2D.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/SNGNN2D.ice")
 from RoboCompSNGNN2D import *
 
 

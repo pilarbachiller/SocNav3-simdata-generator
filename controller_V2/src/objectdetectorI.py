@@ -29,7 +29,7 @@ if len(ROBOCOMP)<1:
     raise RuntimeError('ROBOCOMP environment variable not set! Exiting.')
 
 
-Ice.loadSlice("-I ./src/ --all ./src/ObjectDetector.ice")
+Ice.loadSlice("-I ../interfaces --all ../interfaces/ObjectDetector.ice")
 
 from RoboCompObjectDetector import *
 
