@@ -70,6 +70,8 @@ INCLUDE_DIRECTORIES (
   ${CMAKE_BINARY_DIR}
 )
 
+FIND_PACKAGE( Ice REQUIRED COMPONENTS Ice IceStorm OPTIONAL_COMPONENTS IceUtil )
+INCLUDE( ${RC_COMPONENT_PATH}/qt.cmake )
 INCLUDE ( CMakeListsSpecific.txt)
 
 # Sources set
@@ -79,6 +81,7 @@ SET ( SOURCES
   #$ENV{ROBOCOMP}/classes/sigwatch/sigwatch.cpp
   #$ENV{ROBOCOMP}/classes/qlog/qlog.cpp
   main.cpp
+  sigwatch.cpp
   genericmonitor.cpp
   commonbehaviorI.cpp
   genericworker.cpp

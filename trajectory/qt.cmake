@@ -1,8 +1,8 @@
 IF (NOT QT.CMAKE)
 	set (QT.CMAKE TRUE)
 	# QT
-	option (USE_QT6 "Build with QT6" ON)
-	option (USE_QT5 "Build with QT5" OFF)
+	option (USE_QT6 "Build with QT6" OFF)
+	option (USE_QT5 "Build with QT5" ON)
 	option (USE_QT4 "Build with QT4" OFF)
 
 	# Default => Qt6 if not found tries with Qt5

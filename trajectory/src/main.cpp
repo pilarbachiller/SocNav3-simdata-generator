@@ -70,9 +70,9 @@
 #include <IceStorm/IceStorm.h>
 #include <Ice/Application.h>
 
-#include <rapplication/rapplication.h>
-#include <sigwatch/sigwatch.h>
-#include <qlog/qlog.h>
+// #include <rapplication/rapplication.h>
+#include <sigwatch.h>
+// #include <qlog/qlog.h>
 
 #include "config.h"
 #include "genericmonitor.h"
@@ -96,7 +96,7 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 
-class trajectory : public RoboComp::Application
+class trajectory : public Ice::Application // RoboComp::Application
 {
 public:
 	trajectory (QString prfx) { prefix = prfx.toStdString(); }
@@ -154,7 +154,7 @@ int ::trajectory::run(int argc, char* argv[])
 		cout << "[" << PROGRAM_NAME << "]: Exception creating proxy OmniRobot: " << ex;
 		return EXIT_FAILURE;
 	}
-	rInfo("OmniRobotProxy initialized Ok!");
+	// rInfo("OmniRobotProxy initialized Ok!");
 
 	string FR;
 	if (not GenericMonitor::configGetString(communicator(), prefix, "FrameOfReference", FR, ""))

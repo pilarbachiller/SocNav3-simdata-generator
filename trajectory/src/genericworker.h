@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include <stdint.h>
+#include <QtCore>
 // #include <qlog/qlog.h>
 #include <CommonBehavior.h>
 

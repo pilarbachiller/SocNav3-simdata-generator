@@ -67,7 +67,7 @@ void GenericMonitor::setPeriod(int _period)
 */
 void GenericMonitor::killYourSelf()
 {
-	rDebug("Killing myself");
+	// rDebug("Killing myself");
 	worker->killYourSelf();
 	emit kill();
 
@@ -94,7 +94,7 @@ RoboCompCommonBehavior::ParameterList GenericMonitor::getParameterList()
 */
 void GenericMonitor::setParameterList(RoboCompCommonBehavior::ParameterList l)
 {
-	rInfo("Changing configuration params");
+	// rInfo("Changing configuration params");
 	sendParamsToWorker(l);
 }
 
@@ -145,7 +145,7 @@ bool GenericMonitor::configGetString(Ice::CommunicatorPtr communicator, const st
 		if (list->contains(QString::fromStdString(value)) == false)
 		{
 			qFatal("Reading config file: %s is not a valid string", compound.c_str());
-			rError("Reading config file:"+compound+" is not a valid string");
+			// rError("Reading config file:"+compound+" is not a valid string");
 		}
 		QString error = QString("not valid configuration value");
 		qDebug() << error;
