@@ -29,7 +29,7 @@
 
 
 #include <genericworker.h>
-#include <innermodel/innermodel.h>
+//#include <innermodel/innermodel.h>
 #include <time.h>
 
 #include <opencv2/opencv.hpp>
