@@ -62,8 +62,8 @@ ENDMACRO( ROBOCOMP_WRAP_ICE )
 #ROBOCOMP_WRAP_ICE( CommonBehavior GenericBase ObjectDetector OmniRobot PeopleDetector SNGNN2D WallDetector GoalPublisher)
 
 #INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
-#INCLUDE( qt.cmake )
-find_package(Qt6 COMPONENTS Core REQUIRED)
+
+#find_package(Qt6 COMPONENTS Core REQUIRED)
 INCLUDE_DIRECTORIES (
   ${CMAKE_CURRENT_BINARY_DIR}
   .
