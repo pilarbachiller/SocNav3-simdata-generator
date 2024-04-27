@@ -1,3 +1,57 @@
+import sys
+import os
+import cv2
+import numpy as np
+from PySide2 import QtGui, QtWidgets, QtCore
+from mainUI import Ui_MainWindow
+
+sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
+import socnavgym
+import gym
+
+
+class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.setupUi(self)
+
+        self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
+        obs, _ = self.env.reset()
+
+        self.quit.clicked.connect(self.quit_slot)
+
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.compute)
+        self.timer.start(30)
+
+    def compute(self):
+        obs, reward, terminated, truncated, info = self.env.step([0,0,0]) 
+        image = self.env.render_without_showing()
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB )
+        image = image.astype(np.uint8)
+
+        labelSize = (self.label.width(), self.label.height())
+        image = cv2.resize(image, labelSize)
+        self.label.setPixmap(QtGui.QPixmap(QtGui.QImage(image.data, image.shape[1], image.shape[0], QtGui.QImage.Format_RGB888)))
+
+
+    def resizeEvent(self, event):
+        print('resize')
+        self.label.setGeometry(self.label.x(), self.label.y(), (self.label.width()//4)*4, self.label.height())
+        self.label.resize((self.label.width()//4)*4, self.label.height())
+
+
+    def quit_slot(self):
+        self.close()
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    mainWin = MainWindow()
+    mainWin.show()
+    sys.exit(app.exec_())
+
+
 import torch
 import time
 import gym
