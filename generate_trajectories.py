@@ -20,10 +20,15 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         
         self.init_joystick()
 
+        self.save_dir = './trajectory_dataset/'
+        self.data_file_index = 0
+        self.update_data_index()
+        self.images_for_video = list()
+
         self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
         obs, _ = self.env.reset()
 
-        self.quit.clicked.connect(self.quit_slot)
+        self.quit_button.clicked.connect(self.quit_slot)
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.compute)
@@ -79,6 +84,20 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         print(min_values)
         print(max_values)        
 
+    def update_data_index(self):
+        if not os.path.isdir(self.save_dir):
+            os.mkdir(self.save_dir)
+        file_list = [f for f in os.listdir(self.save_dir) if f.endswith('.mp4')]
+        max_index = -1
+        for f in file_list:
+            ind_str = f.split(self.dataID.text())
+            if len(ind_str)>1:
+                ind = int(ind_str[1].split('.')[0])
+                if ind > max_index:
+                    max_index = ind
+        self.data_file_index = max_index+1
+
+
     def get_robot_movement(self):
         pygame.event.pump()
         for i in range(self.joystick_count):
@@ -100,13 +119,37 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def compute(self):
         robot_vel = self.get_robot_movement()
         obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
+
         image = self.env.render_without_showing()
+        image = image.astype(np.uint8)        
+
+        if not terminated:
+            self.images_for_video.append(cv2.resize(image, (500, 500)))
+        else:
+            if self.start_saving_button.isChecked():
+                self.save_data()
+            self.regenerate()
+
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB )
-        image = image.astype(np.uint8)
 
         labelSize = ((self.label.width()//4)*4, self.label.height())
         image = cv2.resize(image, labelSize)
         self.label.setPixmap(QtGui.QPixmap(QtGui.QImage(image.data, image.shape[1], image.shape[0], QtGui.QImage.Format_RGB888)))
+
+    def regenerate(self):
+        self.images_for_video.clear()
+        self.env.reset()
+
+    def save_data(self):
+        file_name = self.dataID.text() + '{0:06d}'.format(self.data_file_index)
+        fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4
+        writer = cv2.VideoWriter(self.save_dir + file_name + '.mp4', fourcc, 30, (self.images_for_video[0].shape[1], self.images_for_video[0].shape[0])) 
+        for image in self.images_for_video:
+            writer.write(image)
+        writer.release()
+
+        self.data_file_index += 1
+
 
 
     def quit_slot(self):

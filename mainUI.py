@@ -30,36 +30,37 @@ class Ui_MainWindow(object):
         self.verticalLayout_main.setObjectName(u"verticalLayout_main")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.configuration = QPushButton(MainWindow)
-        self.configuration.setObjectName(u"configuration")
-        self.configuration.setCheckable(True)
+        self.regenerate_button = QPushButton(MainWindow)
+        self.regenerate_button.setObjectName(u"regenerate_button")
 
-        self.horizontalLayout.addWidget(self.configuration)
-
-        self.regenerate = QPushButton(MainWindow)
-        self.regenerate.setObjectName(u"regenerate")
-
-        self.horizontalLayout.addWidget(self.regenerate)
+        self.horizontalLayout.addWidget(self.regenerate_button)
 
         self.label_2 = QLabel(MainWindow)
         self.label_2.setObjectName(u"label_2")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.label_2.sizePolicy().hasHeightForWidth())
+        self.label_2.setSizePolicy(sizePolicy1)
+        self.label_2.setMinimumSize(QSize(80, 0))
 
         self.horizontalLayout.addWidget(self.label_2)
 
-        self.contributor = QLineEdit(MainWindow)
-        self.contributor.setObjectName(u"contributor")
+        self.dataID = QLineEdit(MainWindow)
+        self.dataID.setObjectName(u"dataID")
 
-        self.horizontalLayout.addWidget(self.contributor)
+        self.horizontalLayout.addWidget(self.dataID)
 
-        self.save_metrics = QPushButton(MainWindow)
-        self.save_metrics.setObjectName(u"save_metrics")
+        self.start_saving_button = QPushButton(MainWindow)
+        self.start_saving_button.setObjectName(u"start_saving_button")
+        self.start_saving_button.setCheckable(True)
 
-        self.horizontalLayout.addWidget(self.save_metrics)
+        self.horizontalLayout.addWidget(self.start_saving_button)
 
-        self.quit = QPushButton(MainWindow)
-        self.quit.setObjectName(u"quit")
+        self.quit_button = QPushButton(MainWindow)
+        self.quit_button.setObjectName(u"quit_button")
 
-        self.horizontalLayout.addWidget(self.quit)
+        self.horizontalLayout.addWidget(self.quit_button)
 
 
         self.verticalLayout_main.addLayout(self.horizontalLayout)
@@ -87,12 +88,11 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Social Navigation Dataset Generator", None))
-        self.configuration.setText(QCoreApplication.translate("MainWindow", u"configuration", None))
-        self.regenerate.setText(QCoreApplication.translate("MainWindow", u"regenerate", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"contributor's unique id:", None))
-        self.contributor.setText(QCoreApplication.translate("MainWindow", u"default", None))
-        self.save_metrics.setText(QCoreApplication.translate("MainWindow", u"save metrics", None))
-        self.quit.setText(QCoreApplication.translate("MainWindow", u"quit", None))
+        self.regenerate_button.setText(QCoreApplication.translate("MainWindow", u"regenerate", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"data id", None))
+        self.dataID.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.start_saving_button.setText(QCoreApplication.translate("MainWindow", u"start saving", None))
+        self.quit_button.setText(QCoreApplication.translate("MainWindow", u"quit", None))
         self.label.setText("")
     # retranslateUi
 

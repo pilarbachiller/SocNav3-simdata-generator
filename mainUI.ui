@@ -31,17 +31,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="configuration">
-         <property name="text">
-          <string>configuration</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="regenerate">
+        <widget class="QPushButton" name="regenerate_button">
          <property name="text">
           <string>regenerate</string>
          </property>
@@ -49,27 +39,42 @@
        </item>
        <item>
         <widget class="QLabel" name="label_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
-          <string>contributor's unique id:</string>
+          <string>data id</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="contributor">
+        <widget class="QLineEdit" name="dataID">
          <property name="text">
-          <string>default</string>
+          <string>A</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="save_metrics">
+        <widget class="QPushButton" name="start_saving_button">
          <property name="text">
-          <string>save metrics</string>
+          <string>start saving</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="quit">
+        <widget class="QPushButton" name="quit_button">
          <property name="text">
           <string>quit</string>
          </property>
