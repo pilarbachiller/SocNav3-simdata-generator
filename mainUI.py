@@ -64,20 +64,13 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_main.addLayout(self.horizontalLayout)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-
-        self.verticalLayout_main.addItem(self.verticalSpacer)
-
         self.label = QLabel(MainWindow)
         self.label.setObjectName(u"label")
-        sizePolicy1 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
-        sizePolicy1.setHorizontalStretch(2)
-        sizePolicy1.setVerticalStretch(2)
-        sizePolicy1.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
-        self.label.setSizePolicy(sizePolicy1)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
         self.label.setMinimumSize(QSize(500, 500))
         self.label.setMaximumSize(QSize(10240, 7680))
-        self.label.setSizeIncrement(QSize(2, 2))
+        self.label.setSizeIncrement(QSize(1, 1))
         self.label.setFrameShape(QFrame.Box)
         self.label.setScaledContents(True)
 

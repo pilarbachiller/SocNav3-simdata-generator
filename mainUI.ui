@@ -78,24 +78,11 @@
       </layout>
      </item>
      <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-         <horstretch>2</horstretch>
-         <verstretch>2</verstretch>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
@@ -112,8 +99,8 @@
        </property>
        <property name="sizeIncrement">
         <size>
-         <width>2</width>
-         <height>2</height>
+         <width>1</width>
+         <height>1</height>
         </size>
        </property>
        <property name="frameShape">

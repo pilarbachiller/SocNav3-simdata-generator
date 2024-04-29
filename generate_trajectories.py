@@ -2,6 +2,9 @@ import sys
 import os
 import cv2
 import numpy as np
+import pygame
+import time
+import pickle
 from PySide2 import QtGui, QtWidgets, QtCore
 from mainUI import Ui_MainWindow
 
@@ -14,6 +17,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
+        
+        self.init_joystick()
 
         self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
         obs, _ = self.env.reset()
@@ -24,21 +29,84 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.timer.timeout.connect(self.compute)
         self.timer.start(30)
 
+    def init_joystick(self):
+        pygame.init()
+        pygame.joystick.init()
+        self.joystick_count = pygame.joystick.get_count()
+        self.joystick = pygame.joystick.Joystick(0)
+        self.joystick.init()
+        axes = self.joystick.get_numaxes()
+
+        try:
+            with open('joystick_calibration.pickle', 'rb') as f:
+                centre, values, min_values, max_values = pickle.load(f)
+        except:
+            centre = {}
+            values = {}
+            min_values = {}
+            max_values = {}
+            for axis in range(self.joystick.get_numaxes()):
+                values[axis] = 0.
+                centre[axis] = 0.
+                min_values[axis] = 0.
+                max_values[axis] = 0.
+            T = 3.
+            print(f'Leave the controller neutral for {T} seconds')
+            t = time.time()
+            while time.time() - t < T:
+                pygame.event.pump()
+                for axis in range(axes):
+                    centre[axis] = self.joystick.get_axis(axis)
+                time.sleep(0.05)
+            T = 5.
+            print(f'Move the joystick around for {T} seconds trying to reach the max and min values for the axes')
+            t = time.time()
+            while time.time() - t < T:
+                pygame.event.pump()
+                for axis in range(axes):
+                    value = self.joystick.get_axis(axis)-centre[axis]
+                    if value > max_values[axis]:
+                        max_values[axis] = value
+                    if value < min_values[axis]:
+                        min_values[axis] = value
+                time.sleep(0.05)
+            with open('joystick_calibration.pickle', 'wb') as f:
+                pickle.dump([centre, values, min_values, max_values], f)
+        self.values = values
+        self.centre = centre
+        self.min_values = min_values
+        self.max_values = max_values
+        print(min_values)
+        print(max_values)        
+
+    def get_robot_movement(self):
+        pygame.event.pump()
+        for i in range(self.joystick_count):
+            # print(f'{i} ', end='')
+            # joystick = pygame.joystick.Joystick(int(args["joystick_id"]))
+            axes = self.joystick.get_numaxes()
+            for axis in range(axes):
+                self.values[axis] = self.joystick.get_axis(axis)-self.centre[axis]
+
+        # values[1] = max(-values[1], 0.)
+        # forward_speed = (values[1]-0.5)*2/max_values[1]
+        vel_x = -self.values[1]/self.max_values[1]
+        vel_y = -self.values[0]/self.max_values[0]
+        vel_a = -self.values[4]/self.max_values[4]
+        if self.env.robot.type == "diff-drive": vel_y = 0
+        return [vel_x, vel_y, vel_a]
+
+
     def compute(self):
-        obs, reward, terminated, truncated, info = self.env.step([0,0,0]) 
+        robot_vel = self.get_robot_movement()
+        obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
         image = self.env.render_without_showing()
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB )
         image = image.astype(np.uint8)
 
-        labelSize = (self.label.width(), self.label.height())
+        labelSize = ((self.label.width()//4)*4, self.label.height())
         image = cv2.resize(image, labelSize)
         self.label.setPixmap(QtGui.QPixmap(QtGui.QImage(image.data, image.shape[1], image.shape[0], QtGui.QImage.Format_RGB888)))
-
-
-    def resizeEvent(self, event):
-        print('resize')
-        self.label.setGeometry(self.label.x(), self.label.y(), (self.label.width()//4)*4, self.label.height())
-        self.label.resize((self.label.width()//4)*4, self.label.height())
 
 
     def quit_slot(self):
