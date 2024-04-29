@@ -140,6 +140,200 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         image = cv2.resize(image, labelSize)
         self.label.setPixmap(QtGui.QPixmap(QtGui.QImage(image.data, image.shape[1], image.shape[0], QtGui.QImage.Format_RGB888)))
 
+    # def get_observations(self):
+    #     observations = {}
+    #     for entity in self.env.static_humans + self.env.dynamic_humans + self.env.tables + self.env.laptops + self.env.plants + self.env.walls:
+    #         coordinates, angle = [entity.x, entity.y], entity.orientation
+    #         sin_theta = np.sin(angle)
+    #         cos_theta = np.cos(angle)
+
+    #         theta = np.arctan2(sin_theta, cos_theta)
+    #         observations[entity.id] = EntityObs(
+    #             entity.id,
+    #             coordinates[0],
+    #             coordinates[1],
+    #             theta,
+    #             sin_theta,
+    #             cos_theta
+    #         )
+
+    #     # adding human-human interactions
+    #     for i in self.env.moving_interactions + self.env.static_interactions:
+    #         for entity in i.humans:
+    #             coordinates, angle = [entity.x, entity.y], entity.orientation
+    #             sin_theta = np.sin(angle)
+    #             cos_theta = np.cos(angle)
+
+    #             theta = np.arctan2(sin_theta, cos_theta)
+    #             observations[entity.id] = EntityObs(
+    #                 entity.id,
+    #                 coordinates[0],
+    #                 coordinates[1],
+    #                 theta,
+    #                 sin_theta,
+    #                 cos_theta
+    #             )
+        
+    #     # adding human-laptop interactions
+    #     for i in self.env.h_l_interactions:
+    #         entity = i.human
+    #         coordinates, angle = [entity.x, entity.y], entity.orientation
+    #         sin_theta = np.sin(angle)
+    #         cos_theta = np.cos(angle)
+
+    #         theta = np.arctan2(sin_theta, cos_theta)
+    #         observations[entity.id] = EntityObs(
+    #             entity.id,
+    #             coordinates[0],
+    #             coordinates[1],
+    #             theta,
+    #             sin_theta,
+    #             cos_theta
+    #         )
+
+    #         entity = i.laptop
+    #         coordinates, angle = [entity.x, entity.y], entity.orientation
+    #         sin_theta = np.sin(angle)
+    #         cos_theta = np.cos(angle)
+
+    #         theta = np.arctan2(sin_theta, cos_theta)
+    #         observations[entity.id] = EntityObs(
+    #             entity.id,
+    #             coordinates[0],
+    #             coordinates[1],
+    #             theta,
+    #             sin_theta,
+    #             cos_theta
+    #         )
+    #     return observations
+
+    # def get_data(self, observations):
+    #         people = []
+
+    #         for human in self.env.static_humans + self.env.dynamic_humans:
+    #             human_obs = observations[human.id]
+    #             person = {}
+    #             person['id'] = human.id
+    #             person['x'] = human_obs.x
+    #             person['y'] = human_obs.y
+    #             person['angle'] = human_obs.theta
+    #             people.append(person)
+
+    #         objects = []
+    #         for object in self.env.laptops + self.env.tables:
+    #             obs = observations[object.id]
+    #             obj = ObjectT()
+    #             obj.id = obs.id
+    #             obj.x = -obs.y
+    #             obj.y = obs.x
+    #             obj.angle = -(np.pi/2 + np.arctan2(obs.sin_theta, obs.cos_theta))
+    #             obj.bbx1 = -object.length/2
+    #             obj.bbx2 = object.length/2
+    #             obj.bby1 = -object.width/2
+    #             obj.bby2 = object.width/2
+    #             objects.append(obj)
+    #         for object in self.env.plants:
+    #             obs = observations[object.id]
+    #             obj = ObjectT()
+    #             obj.id = obs.id
+    #             obj.x = -obs.y
+    #             obj.y = obs.x
+    #             obj.angle = -(np.pi/2 + np.arctan2(obs.sin_theta, obs.cos_theta))
+    #             obj.bbx1 = -object.radius
+    #             obj.bbx2 = object.radius
+    #             obj.bby1 = -object.radius
+    #             obj.bby2 = object.radius
+    #             objects.append(obj)
+
+    #         walls = []
+    #         for wall in self.env.walls:
+    #             w = WallT()
+    #             x1 = wall.x - np.cos(wall.orientation)*wall.length/2
+    #             x2 = wall.x + np.cos(wall.orientation)*wall.length/2
+    #             y1 = wall.y - np.sin(wall.orientation)*wall.length/2
+    #             y2 = wall.y + np.sin(wall.orientation)*wall.length/2
+    #             a1, _ = self.get_pose([x1, y1], 0)
+    #             a2, _ = self.get_pose([x2, y2], 0)
+    #             # a1 = self.env.get_robot_frame_coordinates(np.array([[x1, y1]])).flatten()
+    #             # a2 = self.env.get_robot_frame_coordinates(np.array([[x2, y2]])).flatten()
+
+    #             w.x1 = -a1[1]
+    #             w.y1 = a1[0]
+    #             w.x2 = -a2[1]
+    #             w.y2 = a2[0]
+    #             walls.append(w)
+
+    #         interactions = []
+    #         for interaction in self.env.moving_interactions + self.env.static_interactions + self.env.h_l_interactions:
+    #             if interaction.name == "human-human-interaction":
+    #                 for human in interaction.humans:
+    #                     human_obs = observations[human.id]
+    #                     person = Person()
+    #                     person.id = human.id
+    #                     person.x = -human_obs.y
+    #                     person.y = human_obs.x
+    #                     person.angle = -(np.pi/2 + np.arctan2(human_obs.sin_theta, human_obs.cos_theta))
+    #                     people.append(person)
+
+    #                 for i in range(len(interaction.humans)):
+    #                     for j in range(i+1, len(interaction.humans)):
+    #                         inter = InteractionT()
+    #                         inter.idSrc = interaction.humans[i].id
+    #                         inter.idDst = interaction.humans[j].id
+    #                         inter.type = "human-human-interaction"
+    #                         interactions.append(inter)
+
+                
+    #             if interaction.name == "human-laptop-interaction":
+    #                 human = interaction.human
+    #                 laptop = interaction.laptop
+
+    #                 human_obs = observations[human.id]
+    #                 person = Person()
+    #                 person.id = human.id
+    #                 person.x = -human_obs.y
+    #                 person.y = human_obs.x
+    #                 person.angle = -(np.pi/2 + np.arctan2(human_obs.sin_theta, human_obs.cos_theta))
+    #                 people.append(person)
+
+
+    #                 obs = observations[laptop.id]
+    #                 obj = ObjectT()
+    #                 obj.id = obs.id
+    #                 obj.x = -obs.y
+    #                 obj.y = obs.x
+    #                 obj.angle = -(np.pi/2 + np.arctan2(obs.sin_theta, obs.cos_theta))
+    #                 obj.bbx1 = -laptop.length/2
+    #                 obj.bbx2 = laptop.length/2
+    #                 obj.bby1 = -laptop.width/2
+    #                 obj.bby2 = laptop.width/2
+    #                 objects.append(obj)
+
+    #                 inter = InteractionT()
+    #                 inter.idSrc = human.id
+    #                 inter.idDst = laptop.id
+    #                 inter.type = "human-laptop-interaction"
+    #                 interactions.append(inter)
+            
+    #         robot_goal, _ = self.get_pose([self.env.robot.goal_x, self.env.robot.goal_y], 0)
+    #         # robot_goal = self.env.get_robot_frame_coordinates(np.array([[self.env.robot.goal_x, self.env.robot.goal_y]])).flatten()
+
+    #         goal = GoalT()
+    #         goal.x = -robot_goal[1]
+    #         goal.y = robot_goal[0]
+
+    #         robot = ObjectT()
+    #         robot.id = -2
+    #         robot.x = self.env.robot.x
+    #         robot.y = self.env.robot.y
+    #         robot.angle = -(-np.pi/2 + self.env.robot.orientation)
+            
+    #         objects.append(robot)
+
+
+    #         return people, objects, walls, interactions, goal
+
+
     def regenerate(self):
         self.images_for_video.clear()
         self.data.clear()
