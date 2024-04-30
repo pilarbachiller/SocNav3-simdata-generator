@@ -34,7 +34,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.compute)
-        self.timer.start(30)
+        self.timer.start(self.env.TIMESTEP*1000)
 
     def init_joystick(self):
         pygame.init()
