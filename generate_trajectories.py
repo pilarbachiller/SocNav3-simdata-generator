@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
 import socnavgym
 import gym
 
+UPDATE_PERIOD = 0.1
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -29,7 +30,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
         self.regenerate()
+        self.last_data_update = time.time()
 
+        # self.start_saving_button.toggled.connect(self.start_saving)
+        self.regenerate_button.clicked.connect(self.regenerate)
         self.quit_button.clicked.connect(self.quit_slot)
 
         self.timer = QtCore.QTimer()
@@ -131,17 +135,19 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         observation["interactions"] = interactions
         observation["goal"] = goal
         
-
-        self.data.append(observation)
         done = terminated or truncated
 
         if not done:
-            self.images_for_video.append(cv2.resize(image, (500, 500)))
+            if time.time()-self.last_data_update > UPDATE_PERIOD:
+                self.images_for_video.append(cv2.resize(image, (500, 500)))
+                self.data.append(observation)            
+                self.last_data_update = time.time()
         else:
             self.end_episode = time.time()
             if self.start_saving_button.isChecked():
                 self.save_data()
             self.regenerate()
+            self.last_data_update = time.time()
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB )
 
@@ -151,7 +157,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
     def get_data(self):
         people = []
-
         for human in self.env.static_humans + self.env.dynamic_humans:
             person = {}
             person['id'] = human.id
@@ -260,6 +265,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         writer.release()
 
         self.data_file_index += 1
+
+    def start_saving(self, save):
+        if save:
+            self.regenerate()
 
     def quit_slot(self):
         self.close()
