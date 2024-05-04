@@ -4,7 +4,7 @@ rendering:
 
 episode:
     episode_length: 1000  # maximum steps in an episode
-    time_step: 0.03  # number of seconds that one step corresponds to
+    time_step: 0.05  # number of seconds that one step corresponds to
 
 robot:
     robot_radius: 0.35  # radius of the robot
@@ -75,8 +75,8 @@ env:
     min_h_h_dynamic_interactions: 0  # minimum no. of dynamic human-human interactions in the env. Note that these crowds can disperse if the parameter crowd_dispersal_probability is greater than 0
     max_h_h_dynamic_interactions: 1  # maximum no. of dynamic human-human interactions in the env. Note that these crowds can disperse if the parameter crowd_dispersal_probability is greater than 0
 
-    min_h_h_dynamic_interactions_non_dispersing: 0  # minimum no. of dynamic human-human interactions in the env. Note that these crowds never disperse, even if the parameter crowd_dispersal_probability is greater than 0
-    max_h_h_dynamic_interactions_non_dispersing: 1  # maximum no. of dynamic human-human interactions in the env. Note that these crowds never disperse, even if the parameter crowd_dispersal_probability is greater than 0
+    min_h_h_dynamic_interactions_non_dispersing: 2  # minimum no. of dynamic human-human interactions in the env. Note that these crowds never disperse, even if the parameter crowd_dispersal_probability is greater than 0
+    max_h_h_dynamic_interactions_non_dispersing: 2  # maximum no. of dynamic human-human interactions in the env. Note that these crowds never disperse, even if the parameter crowd_dispersal_probability is greater than 0
 
     min_h_h_static_interactions: 0  # minimum no. of static human-human interactions in the env. Note that these crowds can disperse if the parameter crowd_dispersal_probability is greater than 0
     max_h_h_static_interactions: 1  # maximum no. of static human-human interactions in the env. Note that these crowds can disperse if the parameter crowd_dispersal_probability is greater than 0
@@ -85,7 +85,7 @@ env:
     max_h_h_static_interactions_non_dispersing: 1  # minimum no. of static human-human interactions in the env. Note that these crowds never disperse, even if the parameter crowd_dispersal_probability is greater than 0
 
     min_human_in_h_h_interactions: 2  # minimum no. of humans in a human-human interaction
-    max_human_in_h_h_interactions: 2  # maximum no. of humans in a human-human interaction
+    max_human_in_h_h_interactions: 3  # maximum no. of humans in a human-human interaction
 
     min_h_l_interactions: 0  # minimum number of human-laptop interactions. Note that these human laptop interactions may disperse when the parameter human_laptop_dispersal_probability is greater than 0
     max_h_l_interactions: 1  # maximum number of human-laptop interactions. Note that these human laptop interactions may disperse when the parameter human_laptop_dispersal_probability is greater than 0
