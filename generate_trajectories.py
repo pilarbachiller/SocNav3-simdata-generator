@@ -120,20 +120,23 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot_vel = self.get_robot_movement()
         obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
 
+        print(info['sngnn_reward'])
+
         image = self.env.render_without_showing()
         image = image.astype(np.uint8)
 
 
-        people, objects, walls, interactions, goal = self.get_data()
+        people, objects, walls, interactions, robot = self.get_data()
 
         observation = {}
         observation["timestamp"] = time.time()
-        observation["action"] = robot_vel
+        observation["robot"] = robot
         observation["people"] = people
         observation["objects"] = objects
         observation["walls"] = walls
         observation["interactions"] = interactions
-        observation["goal"] = goal
+
+
         
         done = terminated or truncated
 
@@ -238,11 +241,17 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 inter['type'] = "human-laptop-interaction"
                 interactions.append(inter)
         
-        goal = {}
-        goal['x'] = self.env.robot.goal_x
-        goal['y'] = self.env.robot.goal_y
+        robot = {}
+        robot['x'] = self.env.robot.x
+        robot['y'] = self.env.robot.y
+        robot['angle'] = self.env.robot.orientation
+        robot['speed_x'] = float(self.env.robot.vel_x)
+        robot['speed_y'] = float(self.env.robot.vel_y)
+        robot['speed_a'] = float(self.env.robot.vel_a)
+        robot['goal_x'] = self.env.robot.goal_x
+        robot['goal_y'] = self.env.robot.goal_y
 
-        return people, objects, walls, interactions, goal
+        return people, objects, walls, interactions, robot
 
 
     def regenerate(self):
