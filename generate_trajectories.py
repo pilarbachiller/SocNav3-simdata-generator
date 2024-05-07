@@ -29,10 +29,14 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.data = list()
 
         self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
+        self.simulation_time = 0
+        self.last_save_simulation_time = -1
+        self.n_steps = 0
         self.regenerate()
+
         self.last_data_update = time.time()
 
-        # self.start_saving_button.toggled.connect(self.start_saving)
+        self.start_saving_button.toggled.connect(self.start_saving)
         self.regenerate_button.clicked.connect(self.regenerate)
         self.quit_button.clicked.connect(self.quit_slot)
 
@@ -120,7 +124,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot_vel = self.get_robot_movement()
         obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
 
-        print(info['sngnn_reward'])
+        # print(info['sngnn_reward'])
 
         image = self.env.render_without_showing()
         image = image.astype(np.uint8)
@@ -128,8 +132,11 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         people, objects, walls, interactions, robot = self.get_data()
 
+        self.n_steps +=1
+        self.simulation_time = self.n_steps*self.env.TIMESTEP
+
         observation = {}
-        observation["timestamp"] = time.time()
+        observation["timestamp"] = self.simulation_time
         observation["robot"] = robot
         observation["people"] = people
         observation["objects"] = objects
@@ -141,10 +148,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         done = terminated or truncated
 
         if not done:
-            if time.time()-self.last_data_update > UPDATE_PERIOD:
+            if self.simulation_time-self.last_save_simulation_time >= UPDATE_PERIOD:
                 self.images_for_video.append(cv2.resize(image, (500, 500)))
                 self.data.append(observation)            
-                self.last_data_update = time.time()
+                self.last_save_simulation_time = self.simulation_time
         else:
             self.end_episode = time.time()
             if self.start_saving_button.isChecked():
@@ -259,6 +266,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.data.clear()
         self.env.reset()
         self.ini_episode = time.time()
+        self.simulation_time = 0
+        self.last_save_simulation_time = -1
+        self.n_steps = 0
 
     def save_data(self):
         file_name = self.dataID.text() + '{0:06d}'.format(self.data_file_index)

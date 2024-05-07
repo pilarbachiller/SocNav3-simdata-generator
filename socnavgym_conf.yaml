@@ -4,7 +4,7 @@ rendering:
 
 episode:
     episode_length: 1000  # maximum steps in an episode
-    time_step: 0.05  # number of seconds that one step corresponds to
+    time_step: 0.1  # number of seconds that one step corresponds to
 
 robot:
     robot_radius: 0.35  # radius of the robot
