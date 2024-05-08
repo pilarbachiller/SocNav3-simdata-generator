@@ -14,6 +14,9 @@ import socnavgym
 import gym
 
 UPDATE_PERIOD = 0.1
+GRID_WIDTH = 120 # size in cells
+GRID_HEIGHT = 120 # size in cells
+GRID_CELL_SIZE = 10 # size in centimeters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -131,6 +134,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
 
         people, objects, walls, interactions, robot = self.get_data()
+
+        if self.n_steps==0:
+            self.generate_grid(objects, walls)
+
 
         self.n_steps +=1
         self.simulation_time = self.n_steps*self.env.TIMESTEP
@@ -259,6 +266,46 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot['goal_y'] = self.env.robot.goal_y
 
         return people, objects, walls, interactions, robot
+
+    def generate_grid(self, objects, walls):
+        grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
+        for w in walls:
+            p1 = self.world_to_grid((w[0], w[1]))
+            p2 = self.world_to_grid((w[2], w[3]))
+            cv2.line(grid, p1, p2, 255, 1)
+        for o in objects:
+            points = []
+            points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
+            points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
+            points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
+            points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
+            r_points = self.rotate_points(points, (o['x'], o['y']), o['angle'])
+            print("r_points", r_points)
+            g_points = []
+            for p in r_points:
+                w_p = self.world_to_grid(p)
+                g_points.append([w_p[0], w_p[1]])
+            print("g_points", np.array(g_points))
+            # cv2.fillPoly(grid, np.array([[33, 61], [32, 62], [30, 59], [31, 58]]), 255)
+            # p1 = self.world_to_grid((o['x'], o['y']))
+            # p2 = self.world_to_grid((o['x']+o['size'][0], o['y']+o['size'][1]))
+            # cv2.rectangle(grid, p1, p2, 255, 1)
+        cv2.imshow("grid", grid)
+        cv2.waitKey(1)
+        
+
+    def world_to_grid(self, pW):
+        pGx = pW[0]*100/GRID_CELL_SIZE + GRID_WIDTH/2
+        pGy = pW[1]*100/GRID_CELL_SIZE + GRID_HEIGHT/2
+        return (int(pGx), int(pGy))
+
+    def rotate_points(self, points, center, angle):
+        r_points = []
+        for p in points:        
+            p_x = center[0] + np.cos(angle) * (p[0] - center[0]) - np.sin(angle) * (p[1] - center[0])
+            p_y = center[1] + np.sin(angle) * (p[0] - center[1]) + np.cos(angle) * (p[1] - center[1])
+            r_points.append((p_x, p_y))
+        return r_points
 
 
     def regenerate(self):
