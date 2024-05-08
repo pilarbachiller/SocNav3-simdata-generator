@@ -14,9 +14,9 @@ import socnavgym
 import gym
 
 UPDATE_PERIOD = 0.1
-GRID_WIDTH = 120 # size in cells
-GRID_HEIGHT = 120 # size in cells
-GRID_CELL_SIZE = 10 # size in centimeters. Square cells are assumed
+GRID_WIDTH = 220 # size in cells
+GRID_HEIGHT = 220 # size in cells
+GRID_CELL_SIZE = 5 # size in centimeters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -284,13 +284,11 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             g_points = []
             for p in r_points:
                 w_p = self.world_to_grid(p)
-                g_points.append([w_p[0], w_p[1]])
-            print("g_points", np.array(g_points))
-            # cv2.fillPoly(grid, np.array([[33, 61], [32, 62], [30, 59], [31, 58]]), 255)
-            # p1 = self.world_to_grid((o['x'], o['y']))
-            # p2 = self.world_to_grid((o['x']+o['size'][0], o['y']+o['size'][1]))
-            # cv2.rectangle(grid, p1, p2, 255, 1)
-        cv2.imshow("grid", grid)
+                g_points.append([int(w_p[0]), int(w_p[1])])
+            cv2.fillPoly(grid, [np.array(g_points, np.int32)], 255)
+        grid_resize = cv2.resize(grid, (400, 400))
+        grid_resize = cv2.flip(grid_resize, 0)
+        cv2.imshow("grid", grid_resize)
         cv2.waitKey(1)
         
 
@@ -302,8 +300,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def rotate_points(self, points, center, angle):
         r_points = []
         for p in points:        
-            p_x = center[0] + np.cos(angle) * (p[0] - center[0]) - np.sin(angle) * (p[1] - center[0])
-            p_y = center[1] + np.sin(angle) * (p[0] - center[1]) + np.cos(angle) * (p[1] - center[1])
+            p_x = center[0] - np.sin(angle) * (p[0] - center[0]) + np.cos(angle) * (p[1] - center[1])
+            p_y = center[1] + np.cos(angle) * (p[0] - center[0]) + np.sin(angle) * (p[1] - center[1])
+
             r_points.append((p_x, p_y))
         return r_points
 
