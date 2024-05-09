@@ -14,9 +14,9 @@ import socnavgym
 import gym
 
 UPDATE_PERIOD = 0.1
-GRID_WIDTH = 220 # size in cells
-GRID_HEIGHT = 220 # size in cells
-GRID_CELL_SIZE = 5 # size in centimeters. Square cells are assumed
+GRID_WIDTH = 350 # size in cells
+GRID_HEIGHT = 350 # size in cells
+GRID_CELL_SIZE = 3 # size in centimeters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -191,6 +191,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj['y'] = o.y
             obj['angle'] = o.orientation
             obj['size'] = [o.width, o.length]
+            obj['type'] = "laptop" if o in self.env.laptops else "table"
             objects.append(obj)
         for o in self.env.plants:
             obj = {}
@@ -199,6 +200,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj['y'] = o.y
             obj['angle'] = o.orientation
             obj['size'] = [o.radius, o.radius]
+            obj['type'] = "plant"
             objects.append(obj)
 
         walls = []
@@ -247,6 +249,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 obj['y'] = laptop.y
                 obj['angle'] = laptop.orientation
                 obj['size'] = [laptop.width, laptop.length]
+                obj['type'] = "laptop"
                 objects.append(obj)
 
                 inter = {}
@@ -268,25 +271,43 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         return people, objects, walls, interactions, robot
 
     def generate_grid(self, objects, walls):
-        grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
+        grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.int8)
+        grid.fill(-1)
+        room = []
         for w in walls:
             p1 = self.world_to_grid((w[0], w[1]))
             p2 = self.world_to_grid((w[2], w[3]))
-            cv2.line(grid, p1, p2, 255, 1)
+            room.append(p1)
+            room.append(p2)
+
+        cv2.fillPoly(grid, [np.array(room, np.int32)], 0)
+        cv2.polylines(grid, [np.array(room, np.int32)], True, 1)
+            # cv2.line(grid, p1, p2, 1, 1)
         for o in objects:
-            points = []
-            points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
-            points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
-            points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
-            points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
-            r_points = self.rotate_points(points, (o['x'], o['y']), o['angle'])
-            print("r_points", r_points)
-            g_points = []
-            for p in r_points:
-                w_p = self.world_to_grid(p)
-                g_points.append([int(w_p[0]), int(w_p[1])])
-            cv2.fillPoly(grid, [np.array(g_points, np.int32)], 255)
-        grid_resize = cv2.resize(grid, (400, 400))
+            if o['type'] == "plant":
+                c = self.world_to_grid((o['x'], o['y']))
+                r_p = self.world_to_grid((o['x']+o['size'][0], o['y']))
+                r = abs(c[0]-r_p[0])
+                cv2.circle(grid, c, r, 1, -1)
+            else:
+                points = []
+                points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
+                points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
+                points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
+                points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
+                r_points = self.rotate_points(points, (o['x'], o['y']), o['angle'])
+                g_points = []
+                for p in r_points:
+                    w_p = self.world_to_grid(p)
+                    g_points.append([int(w_p[0]), int(w_p[1])])
+                cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
+        v2gray = {-1:128, 0: 255, 1: 0}
+        visible_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
+        for y in range(grid.shape[0]):
+            for x in range(grid.shape[1]):
+                visible_grid[y][x] = v2gray[grid[y][x]]
+
+        grid_resize = cv2.resize(visible_grid, (400, 400))
         grid_resize = cv2.flip(grid_resize, 0)
         cv2.imshow("grid", grid_resize)
         cv2.waitKey(1)
