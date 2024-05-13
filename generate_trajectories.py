@@ -2,6 +2,7 @@ import sys
 import os
 import cv2
 import json
+import jsbeautifier
 import numpy as np
 import pygame
 import time
@@ -14,9 +15,9 @@ import socnavgym
 import gym
 
 UPDATE_PERIOD = 0.1
-GRID_WIDTH = 350 # size in cells
-GRID_HEIGHT = 350 # size in cells
-GRID_CELL_SIZE = 3 # size in centimeters. Square cells are assumed
+GRID_WIDTH = 175 # size in cells
+GRID_HEIGHT = 175 # size in cells
+GRID_CELL_SIZE = 6 # size in centimeters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -136,7 +137,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         people, objects, walls, interactions, robot = self.get_data()
 
         if self.n_steps==0:
-            self.generate_grid(objects, walls)
+            self.grid = self.generate_grid(objects, walls)
 
 
         self.n_steps +=1
@@ -301,16 +302,19 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                     w_p = self.world_to_grid(p)
                     g_points.append([int(w_p[0]), int(w_p[1])])
                 cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
+
+        grid = cv2.flip(grid, 0)                
         v2gray = {-1:128, 0: 255, 1: 0}
         visible_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
         for y in range(grid.shape[0]):
             for x in range(grid.shape[1]):
                 visible_grid[y][x] = v2gray[grid[y][x]]
 
-        grid_resize = cv2.resize(visible_grid, (400, 400))
-        grid_resize = cv2.flip(grid_resize, 0)
-        cv2.imshow("grid", grid_resize)
+        # grid_resize = cv2.resize(visible_grid, (400, 400))
+
+        cv2.imshow("grid", visible_grid)
         cv2.waitKey(1)
+        return grid
         
 
     def world_to_grid(self, pW):
@@ -340,8 +344,20 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def save_data(self):
         file_name = self.dataID.text() + '{0:06d}'.format(self.data_file_index)
 
+        final_data = {}
+        grid_data = {}
+        grid_data['width'] = GRID_WIDTH
+        grid_data['height'] = GRID_HEIGHT
+        grid_data['cell_size'] = GRID_CELL_SIZE
+        grid_data['data'] = self.grid.tolist()
+        final_data['grid'] = grid_data
+        final_data['sequence'] = self.data
         with open(self.save_dir+ file_name +'.json', 'w') as f:
-            json.dump(self.data, f, indent=4)
+            options = jsbeautifier.default_options()
+            options.indent_size = 2
+            f.write(jsbeautifier.beautify(json.dumps(final_data), options))
+            f.close()
+            # json.dump(final_data, f, indent=4)
 
         fps = len(self.images_for_video)/(self.end_episode-self.ini_episode)
         fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4
