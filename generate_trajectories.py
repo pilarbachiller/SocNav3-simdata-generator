@@ -303,13 +303,14 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                     g_points.append([int(w_p[0]), int(w_p[1])])
                 cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
 
-        grid = cv2.flip(grid, 0)                
+        
         v2gray = {-1:128, 0: 255, 1: 0}
         visible_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
         for y in range(grid.shape[0]):
             for x in range(grid.shape[1]):
                 visible_grid[y][x] = v2gray[grid[y][x]]
 
+        visible_grid = cv2.flip(visible_grid, 0)                
         # grid_resize = cv2.resize(visible_grid, (400, 400))
 
         cv2.imshow("grid", visible_grid)
