@@ -128,7 +128,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot_vel = self.get_robot_movement()
         obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
 
-        # print(info['sngnn_reward'])
+        print(info['DISCOMFORT_SNGNN'])
 
         image = self.env.render_without_showing()
         image = image.astype(np.uint8)
@@ -145,6 +145,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         observation = {}
         observation["timestamp"] = self.simulation_time
+        observation["SNGNN"] = info['DISCOMFORT_SNGNN']
         observation["robot"] = robot
         observation["people"] = people
         observation["objects"] = objects
@@ -162,8 +163,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 self.last_save_simulation_time = self.simulation_time
         else:
             self.end_episode = time.time()
-            if self.start_saving_button.isChecked():
-                self.save_data()
             self.regenerate()
             self.last_data_update = time.time()
 
@@ -334,6 +333,11 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
 
     def regenerate(self):
+        if self.start_saving_button.isChecked():
+            self.save_data()
+        self.new_episode()
+
+    def new_episode(self):            
         self.images_for_video.clear()
         self.data.clear()
         self.env.reset()
@@ -371,7 +375,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
     def start_saving(self, save):
         if save:
-            self.regenerate()
+            self.new_episode()
 
     def quit_slot(self):
         self.close()

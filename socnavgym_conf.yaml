@@ -3,9 +3,9 @@ rendering:
     milliseconds: 30  # delay parameter for waitKey()
 
 episode:
-    episode_length: 1000  # maximum steps in an episode
+    episode_length: 300  # maximum steps in an episode
     time_step: 0.1  # number of seconds that one step corresponds to
-    end_with_collision: True
+    end_with_collision: False
 
 robot:
     robot_radius: 0.35  # radius of the robot
@@ -55,7 +55,7 @@ env:
     crowd_formation_probability: 0.0  # probability of crowd formation
     human_laptop_formation_probability: 0.0  # probability to form a human-laptop-interaction
 
-    reward_file: "dsrnn"  # Path to custom-reward file. If you want to use the in-built SNGNN reward function or the DSRNN reward function, set the value to "sngnn" or "dsrnn" respectively
+    reward_file: "sngnn"  # Path to custom-reward file. If you want to use the in-built SNGNN reward function or the DSRNN reward function, set the value to "sngnn" or "dsrnn" respectively
 
     cuda_device: 0  # cuda device to use (in case of multiple cuda devices). If cpu or only one cuda device, keep it as 0
     
