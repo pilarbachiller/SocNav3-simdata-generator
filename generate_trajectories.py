@@ -162,7 +162,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 self.data.append(observation)            
                 self.last_save_simulation_time = self.simulation_time
         else:
-            self.end_episode = time.time()
             self.regenerate()
             self.last_data_update = time.time()
 
@@ -176,31 +175,31 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         people = []
         for human in self.env.static_humans + self.env.dynamic_humans:
             person = {}
-            person['id'] = human.id
-            person['x'] = human.x
-            person['y'] = human.y
-            person['angle'] = human.orientation
-            person['speed'] = human.speed
+            person["id"] = human.id
+            person["x"] = human.x
+            person["y"] = human.y
+            person["angle"] = human.orientation
+            person["speed"] = human.speed
             people.append(person)
 
         objects = []
         for o in self.env.laptops + self.env.tables:
             obj = {}
-            obj['id'] = o.id
-            obj['x'] = o.x
-            obj['y'] = o.y
-            obj['angle'] = o.orientation
-            obj['size'] = [o.width, o.length]
-            obj['type'] = "laptop" if o in self.env.laptops else "table"
+            obj["id"] = o.id
+            obj["x"] = o.x
+            obj["y"] = o.y
+            obj["angle"] = o.orientation
+            obj["size"] = [o.width, o.length]
+            obj["type"] = "laptop" if o in self.env.laptops else "table"
             objects.append(obj)
         for o in self.env.plants:
             obj = {}
-            obj['id'] = o.id
-            obj['x'] = o.x
-            obj['y'] = o.y
-            obj['angle'] = o.orientation
-            obj['size'] = [o.radius, o.radius]
-            obj['type'] = "plant"
+            obj["id"] = o.id
+            obj["x"] = o.x
+            obj["y"] = o.y
+            obj["angle"] = o.orientation
+            obj["size"] = [o.radius, o.radius]
+            obj["type"] = "plant"
             objects.append(obj)
 
         walls = []
@@ -216,19 +215,19 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             if interaction.name == "human-human-interaction":
                 for human in interaction.humans:
                     person = {}
-                    person['id'] = human.id
-                    person['x'] = human.x
-                    person['y'] = human.y
-                    person['angle'] = human.orientation
-                    person['speed'] = human.speed
+                    person["id"] = human.id
+                    person["x"] = human.x
+                    person["y"] = human.y
+                    person["angle"] = human.orientation
+                    person["speed"] = human.speed
                     people.append(person)
 
                 for i in range(len(interaction.humans)):
                     for j in range(i+1, len(interaction.humans)):
                         inter = {}
-                        inter['idSrc'] = interaction.humans[i].id
-                        inter['idDst'] = interaction.humans[j].id
-                        inter['type'] = "human-human-interaction"
+                        inter["idSrc"] = interaction.humans[i].id
+                        inter["idDst"] = interaction.humans[j].id
+                        inter["type"] = "human-human-interaction"
                         interactions.append(inter)
 
             
@@ -237,36 +236,36 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 laptop = interaction.laptop
 
                 person = {}
-                person['id'] = human.id
-                person['x'] = human.x
-                person['y'] = human.y
-                person['angle'] = human.orientation
-                person['speed'] = human.speed
+                person["id"] = human.id
+                person["x"] = human.x
+                person["y"] = human.y
+                person["angle"] = human.orientation
+                person["speed"] = human.speed
 
                 obj = {}
-                obj['id'] = laptop.id
-                obj['x'] = laptop.x
-                obj['y'] = laptop.y
-                obj['angle'] = laptop.orientation
-                obj['size'] = [laptop.width, laptop.length]
-                obj['type'] = "laptop"
+                obj["id"] = laptop.id
+                obj["x"] = laptop.x
+                obj["y"] = laptop.y
+                obj["angle"] = laptop.orientation
+                obj["size"] = [laptop.width, laptop.length]
+                obj["type"] = "laptop"
                 objects.append(obj)
 
                 inter = {}
-                inter['idSrc'] = human.id
-                inter['idDst'] = laptop.id
-                inter['type'] = "human-laptop-interaction"
+                inter["idSrc"] = human.id
+                inter["idDst"] = laptop.id
+                inter["type"] = "human-laptop-interaction"
                 interactions.append(inter)
         
         robot = {}
-        robot['x'] = self.env.robot.x
-        robot['y'] = self.env.robot.y
-        robot['angle'] = self.env.robot.orientation
-        robot['speed_x'] = float(self.env.robot.vel_x)
-        robot['speed_y'] = float(self.env.robot.vel_y)
-        robot['speed_a'] = float(self.env.robot.vel_a)
-        robot['goal_x'] = self.env.robot.goal_x
-        robot['goal_y'] = self.env.robot.goal_y
+        robot["x"] = self.env.robot.x
+        robot["y"] = self.env.robot.y
+        robot["angle"] = self.env.robot.orientation
+        robot["speed_x"] = float(self.env.robot.vel_x)
+        robot["speed_y"] = float(self.env.robot.vel_y)
+        robot["speed_a"] = float(self.env.robot.vel_a)
+        robot["goal_x"] = self.env.robot.goal_x
+        robot["goal_y"] = self.env.robot.goal_y
 
         return people, objects, walls, interactions, robot
 
@@ -333,6 +332,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
 
     def regenerate(self):
+        self.end_episode = time.time()
         if self.start_saving_button.isChecked():
             self.save_data()
         self.new_episode()
@@ -351,18 +351,23 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         final_data = {}
         grid_data = {}
-        grid_data['width'] = GRID_WIDTH
-        grid_data['height'] = GRID_HEIGHT
-        grid_data['cell_size'] = GRID_CELL_SIZE
-        grid_data['data'] = self.grid.tolist()
-        final_data['grid'] = grid_data
-        final_data['sequence'] = self.data
-        with open(self.save_dir+ file_name +'.json', 'w') as f:
-            options = jsbeautifier.default_options()
-            options.indent_size = 2
-            f.write(jsbeautifier.beautify(json.dumps(final_data), options))
-            f.close()
-            # json.dump(final_data, f, indent=4)
+        grid_data["width"] = GRID_WIDTH
+        grid_data["height"] = GRID_HEIGHT
+        grid_data["cell_size"] = GRID_CELL_SIZE
+        grid_data["data"] = self.grid.tolist()
+        final_data["grid"] = grid_data
+        final_data["sequence"] = self.data
+        try:
+            with open(self.save_dir+ file_name +'.json', 'w') as f:
+                options = jsbeautifier.default_options()
+                options.indent_size = 2
+                f.write(jsbeautifier.beautify(json.dumps(final_data), options))
+                f.close()
+        except Exception as e:
+            print("format problem in json")
+            print(final_data["sequence"])
+            print(e)
+            exit()
 
         fps = len(self.images_for_video)/(self.end_episode-self.ini_episode)
         fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4
