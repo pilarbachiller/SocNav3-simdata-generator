@@ -130,7 +130,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         print(info['DISCOMFORT_SNGNN'])
 
-        image = self.env.render_without_showing()
+        image = self.env.render_without_showing(draw_human_goal=False)
         image = image.astype(np.uint8)
 
 
