@@ -17,7 +17,7 @@ import gym
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 175 # size in cells
 GRID_HEIGHT = 175 # size in cells
-GRID_CELL_SIZE = 6 # size in centimeters. Square cells are assumed
+GRID_CELL_SIZE = 0.06 # size in meters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -317,8 +317,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         
 
     def world_to_grid(self, pW):
-        pGx = pW[0]*100/GRID_CELL_SIZE + GRID_WIDTH/2
-        pGy = pW[1]*100/GRID_CELL_SIZE + GRID_HEIGHT/2
+        pGx = pW[0]/GRID_CELL_SIZE + GRID_WIDTH/2
+        pGy = pW[1]/GRID_CELL_SIZE + GRID_HEIGHT/2
         return (int(pGx), int(pGy))
 
     def rotate_points(self, points, center, angle):
