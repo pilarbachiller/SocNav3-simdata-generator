@@ -67,6 +67,8 @@ for s in data["sequence"]:
         cv2.line(local_grid, c, a, [0, 0, 255], 2)
 
     # DRAW ROBOT
+    if s["robot"]['x'] is None:
+        continue
     c = world_to_grid((s["robot"]['x'], s["robot"]['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
     r_p = world_to_grid((s["robot"]['x']+ROBOT_RADIUS, s["robot"]['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
     x_a = s["robot"]['x'] + (ROBOT_RADIUS+0.05)*np.cos(s["robot"]['angle'])
@@ -86,11 +88,14 @@ for s in data["sequence"]:
 
 
     cv2.imshow("grid", visible_grid)
-    cv2.waitKey(1)
+    k = cv2.waitKey(1)
+    if k==27:
+        exit()
 
     sleeptime = s["timestamp"]-last_timestamp
     if last_timestamp == -1:
         sleeptime = 0
     last_timestamp = s["timestamp"]
-    time.sleep(sleeptime)
+    # time.sleep(sleeptime)
+    time.sleep(0.1)
 
