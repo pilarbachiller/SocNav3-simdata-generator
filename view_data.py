@@ -27,6 +27,16 @@ def world_to_grid(pW, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH):
     pGy = pW[1]/GRID_CELL_SIZE + GRID_HEIGHT/2
     return (int(pGx), int(pGy))
 
+def rotate_points(points, center, angle):
+    r_points = []
+    for p in points:        
+        p_x = center[0] - np.sin(angle) * (p[0] - center[0]) + np.cos(angle) * (p[1] - center[1])
+        p_y = center[1] + np.cos(angle) * (p[0] - center[0]) + np.sin(angle) * (p[1] - center[1])
+
+        r_points.append((p_x, p_y))
+    return r_points
+
+
 IMAGE_SIDE = 500
 HUMAN_RADIUS = 0.35
 ROBOT_RADIUS = 0.3
@@ -84,6 +94,28 @@ for s in data["sequence"]:
     r = abs(c[0]-r_p[0])
     cv2.circle(local_grid, c, r, [0, 255, 0], 2)
 
+    # DRAW WALLS
+    for w in s["walls"]:
+        p1 = (w[0], w[1])
+        p2 = (w[2], w[3])
+        p1G = world_to_grid(p1, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        p2G = world_to_grid(p2, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        cv2.line(local_grid, p1G, p2G, [0, 0, 255], 2)
+
+    # DRAW OBJECTS
+    for o in s["objects"]:
+        points = []
+        points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
+        points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
+        points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
+        points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
+        r_points = rotate_points(points, (o['x'], o['y']), o['angle'])
+        g_points = []
+        for p in r_points:
+            w_p = world_to_grid(p, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+            g_points.append([int(w_p[0]), int(w_p[1])])
+        cv2.polylines(local_grid, [np.array(g_points, np.int32)], True, [255, 0, 0], 2)
+
     visible_grid = cv2.flip(local_grid, 0)                
 
 
@@ -96,6 +128,5 @@ for s in data["sequence"]:
     if last_timestamp == -1:
         sleeptime = 0
     last_timestamp = s["timestamp"]
-    # time.sleep(sleeptime)
-    time.sleep(0.1)
+    time.sleep(sleeptime)
 
