@@ -37,7 +37,7 @@ def rotate_points(points, center, angle):
     return r_points
 
 
-IMAGE_SIDE = 500
+IMAGE_SIDE = 1000
 HUMAN_RADIUS = 0.35
 ROBOT_RADIUS = 0.3
 GOAL_RADIUS = 0.4
@@ -64,6 +64,9 @@ global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
 last_timestamp = -1
 for s in data["sequence"]:
     local_grid = copy.deepcopy(global_grid)
+    cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
+    cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
+
 
     # DRAW HUMANS
     for p in s["people"]:
