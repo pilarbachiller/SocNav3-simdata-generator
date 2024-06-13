@@ -22,9 +22,25 @@ import cv2
 import json
 import copy
 
+import argparse
+
+IMAGE_SIDE = 1000
+HUMAN_RADIUS = 0.45/2
+HUMAN_DEPTH = 0.20 / 2.
+ROBOT_RADIUS = 0.2
+GOAL_RADIUS = 0.2
+
+parser = argparse.ArgumentParser(
+                    prog='view_data',
+                    description='Displays social navigation interactions')
+parser.add_argument('file', metavar='N', type=str, nargs="?")
+parser.add_argument('--xoffset', type=float, nargs="?", default=0., help='how much to add to x')
+parser.add_argument('--yoffset', type=float, nargs="?", default=0., help='how much to add to y')
+args = parser.parse_args()
+
 def world_to_grid(pW, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH):
-    pGx = pW[0]/GRID_CELL_SIZE + GRID_WIDTH/2
-    pGy = pW[1]/GRID_CELL_SIZE + GRID_HEIGHT/2
+    pGx = (args.xoffset+pW[0])/GRID_CELL_SIZE + GRID_WIDTH/2
+    pGy = (args.yoffset+pW[1])/GRID_CELL_SIZE + GRID_HEIGHT/2
     return (int(pGx), int(pGy))
 
 def rotate_points(points, center, angle):
@@ -32,16 +48,59 @@ def rotate_points(points, center, angle):
     for p in points:        
         p_x = center[0] - np.sin(angle) * (p[0] - center[0]) + np.cos(angle) * (p[1] - center[1])
         p_y = center[1] + np.cos(angle) * (p[0] - center[0]) + np.sin(angle) * (p[1] - center[1])
-
         r_points.append((p_x, p_y))
     return r_points
 
 
-IMAGE_SIDE = 1000
-HUMAN_RADIUS = 0.35
-ROBOT_RADIUS = 0.3
-GOAL_RADIUS = 0.4
-data = json.load(open(sys.argv[-1], 'r'))
+def rotate(x, y, radians):
+    xx = -x * np.sin(radians) + y * np.cos(radians)
+    yy = x * np.cos(radians) + y * np.sin(radians)
+    return [xx, yy]
+
+def draw_person(p, canvas, map_mult):
+    w = HUMAN_RADIUS
+    d = HUMAN_DEPTH
+    a = p["angle"]
+    offset = np.array([p["x"], p["y"]])
+
+    rr = 0.05
+    pts = np.array([rotate( 0, -d, a),
+
+                    rotate(-(w-rr), -d, a),
+                    rotate(-w, -(d-0.05), a),
+
+                    rotate(-w, +(d-rr), a),
+                    rotate(-(w-rr), +d, a),
+
+                    rotate(+(w-rr), +d, a),
+                    rotate(+w, +(d-rr), a),
+
+                    rotate(+w, -(d-rr), a),
+                    rotate(+(w-rr), -d, a),
+
+                    rotate(0, -d, a)])
+    pts += offset
+    pts[:,0] = ((pts[:,0])*map_mult)+canvas.shape[0]/2
+    pts[:,1] = canvas.shape[0]/2-(-(pts[:,1])*map_mult)
+    pts = pts.reshape((1,-1,2)).astype(np.int32)
+    cv2.fillPoly(canvas, pts, (20, 20, 60))
+
+    pts = np.array(rotate(0, 0.05, a)) + offset
+    pts[0] = ((pts[0])*map_mult)+canvas.shape[0]/2
+    pts[1] = canvas.shape[0]/2-(-(pts[1])*map_mult)
+    pts = pts.astype(np.int32)
+    cv2.circle(canvas, (pts[0], pts[1]), 6, (50,40,170), -1)
+
+    pts = np.array(rotate(0, 0.12, a)) + offset
+    pts[0] = ((pts[0])*map_mult)+canvas.shape[0]/2
+    pts[1] = canvas.shape[0]/2-(-(pts[1])*map_mult)
+    pts = pts.astype(np.int32)
+    cv2.circle(canvas, (pts[0], pts[1]), 2, (50,40,170), -1)
+
+
+
+print(args.file)
+data = json.load(open(args.file, 'r'))
 grid = data["grid"]["data"]
 GRID_HEIGHT = data["grid"]["height"]
 GRID_WIDTH = data["grid"]["width"]
@@ -78,6 +137,8 @@ for s in data["sequence"]:
         r = abs(c[0]-r_p[0])
         cv2.circle(local_grid, c, r, [0, 0, 255], 2)
         cv2.line(local_grid, c, a, [0, 0, 255], 2)
+
+        draw_person(p, local_grid, 1./GRID_CELL_SIZE)
 
     # DRAW ROBOT
     if s["robot"]['x'] is None:
