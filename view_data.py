@@ -123,20 +123,20 @@ global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
 last_timestamp = -1
 for s in data["sequence"]:
     local_grid = copy.deepcopy(global_grid)
-    cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
-    cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
+    # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
+    # cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
 
 
     # DRAW HUMANS
     for p in s["people"]:
-        c = world_to_grid((p['x'], p['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
-        r_p = world_to_grid((p['x']+HUMAN_RADIUS, p['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
-        x_a = p['x'] + (HUMAN_RADIUS+0.05)*np.cos(p['angle'])
-        y_a = p['y'] + (HUMAN_RADIUS+0.05)*np.sin(p['angle'])
-        a = world_to_grid((x_a, y_a), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
-        r = abs(c[0]-r_p[0])
-        cv2.circle(local_grid, c, r, [0, 0, 255], 2)
-        cv2.line(local_grid, c, a, [0, 0, 255], 2)
+        # c = world_to_grid((p['x'], p['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        # r_p = world_to_grid((p['x']+HUMAN_RADIUS, p['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        # x_a = p['x'] + (HUMAN_RADIUS+0.05)*np.cos(p['angle'])
+        # y_a = p['y'] + (HUMAN_RADIUS+0.05)*np.sin(p['angle'])
+        # a = world_to_grid((x_a, y_a), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        # r = abs(c[0]-r_p[0])
+        # cv2.circle(local_grid, c, r, [0, 0, 255], 2)
+        # cv2.line(local_grid, c, a, [0, 0, 255], 2)
 
         draw_person(p, local_grid, 1./GRID_CELL_SIZE)
 
@@ -178,7 +178,8 @@ for s in data["sequence"]:
         for p in r_points:
             w_p = world_to_grid(p, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
             g_points.append([int(w_p[0]), int(w_p[1])])
-        cv2.polylines(local_grid, [np.array(g_points, np.int32)], True, [255, 0, 0], 2)
+        cv2.fillPoly(local_grid, [np.array(g_points, np.int32)], [150, 150, 0]) 
+        cv2.polylines(local_grid, [np.array(g_points, np.int32)], True, [255, 0, 0], 4) 
 
     visible_grid = cv2.flip(local_grid, 0)                
 
