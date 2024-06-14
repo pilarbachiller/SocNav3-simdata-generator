@@ -25,7 +25,7 @@ import copy
 import argparse
 
 IMAGE_SIDE = 1000
-HUMAN_RADIUS = 0.45/2
+HUMAN_RADIUS = 0.55/2
 HUMAN_DEPTH = 0.20 / 2.
 ROBOT_RADIUS = 0.2
 GOAL_RADIUS = 0.2
@@ -179,7 +179,7 @@ for s in data["sequence"]:
             w_p = world_to_grid(p, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
             g_points.append([int(w_p[0]), int(w_p[1])])
         cv2.fillPoly(local_grid, [np.array(g_points, np.int32)], [150, 150, 0]) 
-        cv2.polylines(local_grid, [np.array(g_points, np.int32)], True, [255, 0, 0], 4) 
+        cv2.polylines(local_grid, [np.array(g_points, np.int32)], True, [255, 0, 0], 8) 
 
     visible_grid = cv2.flip(local_grid, 0)                
 
