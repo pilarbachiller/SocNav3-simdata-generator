@@ -159,8 +159,8 @@ def draw_object(o, canvas):
         cL = (100,100,100)
         draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], o["size"][0], o["size"][1], cF, cL)
     elif o["type"] == "plant":
-        c = world_to_grid((o['x'], o['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
-        r_p = world_to_grid((o['x']+o['size'][0]/2, o['y']), GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH)
+        c = world_to_grid((o['x'], o['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+        r_p = world_to_grid((o['x']+o['size'][0]/2, o['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
         r = abs(c[0]-r_p[0])
         cv2.circle(canvas, c, r, (29, 67, 105), -1)
         cv2.circle(canvas, c, r//2, (0, 200, 0), -1)
