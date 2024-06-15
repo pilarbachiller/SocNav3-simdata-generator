@@ -36,6 +36,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument('file', metavar='N', type=str, nargs="?")
 parser.add_argument('--xoffset', type=float, nargs="?", default=0., help='how much to add to x')
 parser.add_argument('--yoffset', type=float, nargs="?", default=0., help='how much to add to y')
+parser.add_argument('--rotate', type=float, nargs="?", default=0., help='how much to add to angle') # -30.5-90
+parser.add_argument('--videowidth', type=int, nargs="?", default=0., help='video width')
+parser.add_argument('--videoheight', type=int, nargs="?", default=0., help='video height')
+
+
 args = parser.parse_args()
 
 def world_to_grid(pW, GRID_CELL_SIZE, GRID_HEIGHT, GRID_WIDTH):
@@ -182,8 +187,10 @@ for s in data["sequence"]:
 
     visible_grid = cv2.flip(local_grid, 0)                
 
+    R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[0]//2), args.rotate, 1.0)
+    rotated = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))[120:-85, 85:-85]
 
-    cv2.imshow("grid", visible_grid)
+    cv2.imshow("grid", rotated)
     k = cv2.waitKey(1)
     if k==27:
         exit()
