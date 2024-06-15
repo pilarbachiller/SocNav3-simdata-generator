@@ -24,11 +24,11 @@ import copy
 
 import argparse
 
-IMAGE_SIDE = 1000
-HUMAN_RADIUS = 0.55/2
-HUMAN_DEPTH = 0.20 / 2.
+IMAGE_SIDE = 1800
+HUMAN_RADIUS = 0.55 / 2.
+HUMAN_DEPTH =  0.20 / 2.
 ROBOT_RADIUS = 0.25
-GOAL_RADIUS = 0.3
+GOAL_RADIUS =  0.30
 
 parser = argparse.ArgumentParser(
                     prog='view_data',
@@ -38,17 +38,21 @@ parser.add_argument('--leftcrop', type=int, nargs="?", default=0., help='left cr
 parser.add_argument('--topcrop', type=int, nargs="?", default=0., help='top cropping')
 parser.add_argument('--rightcrop', type=int, nargs="?", default=0., help='right cropping')
 parser.add_argument('--bottomcrop', type=int, nargs="?", default=0., help='bottom cropping')
-parser.add_argument('--rotate', type=float, nargs="?", default=0., help='how much to add to angle') # -30.5-90
-parser.add_argument('--videowidth', type=int, nargs="?", default=0., help='video width')
-parser.add_argument('--videoheight', type=int, nargs="?", default=0., help='video height')
+parser.add_argument('--rotate', type=float, nargs="?", default=0., help='how much to add to angle') # -120.5``
+parser.add_argument('--videowidth', type=int, help='video width', required=True)
+parser.add_argument('--videoheight', type=int, help='video height', required=True)
 
 
 args = parser.parse_args()
 
 def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH):
+    pGx, pGy = world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    return (int(pGx), int(pGy))
+
+def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH):
     pGx = (pW[0])/GRID_CELL_SIZEX + GRID_WIDTH/2
     pGy = (pW[1])/GRID_CELL_SIZEY + GRID_HEIGHT/2
-    return (int(pGx), int(pGy))
+    return pGx, pGy
 
 def rotate_points(points, center, angle):
     r_points = []
@@ -104,10 +108,8 @@ def draw_person(p, canvas, map_multX, map_multY):
     pts = pts.astype(np.int32)
     cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
 
-def draw_robot_and_goal(r, canvas):
+def draw_robot_and_goal(r, local_grid):
     # DRAW ROBOT
-    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    r_p = world_to_grid((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
     a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
@@ -117,17 +119,21 @@ def draw_robot_and_goal(r, canvas):
     y_pa2 = r['y'] - (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     pa1 = world_to_grid((x_pa1, y_pa1), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     pa2 = world_to_grid((x_pa2, y_pa2), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    rad = abs(c[0]-r_p[0])
+    c = world_to_grid_float((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    rad = int(abs(c[0]-r_p[0]))
+    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
     cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
     cv2.line(local_grid, c, a, [107, 36, 0], 2)
     cv2.line(local_grid, pa1, pa2, [107, 36, 0], 2)
 
     # DRAW GOAL
+    c = world_to_grid_float((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    r_p = world_to_grid_float((r['goal_x']+GOAL_RADIUS, r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    r_p = world_to_grid((r['goal_x']+GOAL_RADIUS, r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    r = abs(c[0]-r_p[0])
-    cv2.circle(local_grid, c, r, [0, 255, 0], 2)
+    cv2.circle(local_grid, c, rad, [0, 255, 0], 2)
 
 
 def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
@@ -196,22 +202,34 @@ GRID_CELL_SIZEY = GRID_CELL_SIZE/scaleY
 
 global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
 
-if args.leftcrop > 0 and args.leftcrop < global_grid.shape[1] and args.leftcrop < args.rightcrop:
-    lcrop = args.leftcrop
+if args.leftcrop > 0:
+    if args.leftcrop < global_grid.shape[1]-args.rightcrop:
+        lcrop = args.leftcrop
+    else:
+        print("ignoring left crop")
 else:
     lcrop = 0
-if args.rightcrop > 0 and args.rightcrop < global_grid.shape[1] and args.leftcrop < args.rightcrop:
-    rcrop = args.rightcrop
+if args.rightcrop > 0:
+    if args.rightcrop < global_grid.shape[1]-args.leftcrop:
+        rcrop = args.rightcrop
+    else:
+        print("ignoring right crop")
 else:
-    rcrop = global_grid.shape[1]
-if args.topcrop > 0 and args.topcrop < global_grid.shape[0] and args.topcrop < args.bottomcrop:
-    tcrop = args.topcrop
+    rcrop = 0
+if args.topcrop > 0:
+    if args.topcrop < global_grid.shape[0]-args.bottomcrop:
+        tcrop = args.topcrop
+    else:
+        print("ignoring top crop")
 else:
     tcrop = 0
-if args.bottomcrop > 0 and args.bottomcrop < global_grid.shape[0] and args.topcrop < args.bottomcrop:
-    bcrop = args.bottomcrop
+if args.bottomcrop > 0:
+    if args.bottomcrop < global_grid.shape[0]-args.topcrop:
+        bcrop = args.bottomcrop
+    else:
+        print("ignoring bottom crop")
 else:
-    bcrop = global_grid.shape[0]
+    bcrop = 0
 
 images_for_video = []
 last_timestamp = -1
@@ -245,9 +263,10 @@ for s in data["sequence"]:
     visible_grid = cv2.flip(local_grid, 0)                
 
     R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[0]//2), args.rotate, 1.0)
-    to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))#[120:-85, 85:-85]
+    to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))
 
-    to_show = to_show[tcrop:bcrop,lcrop:rcrop]
+
+    to_show = to_show[tcrop:-bcrop-1,lcrop:-rcrop-1]
 
     images_for_video.append(to_show)
     cv2.imshow("grid", to_show)
