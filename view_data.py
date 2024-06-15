@@ -221,9 +221,16 @@ for s in data["sequence"]:
     visible_grid = cv2.flip(local_grid, 0)                
 
     R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[0]//2), args.rotate, 1.0)
-    rotated = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))[120:-85, 85:-85]
+    to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))[120:-85, 85:-85]
 
-    cv2.imshow("grid", rotated)
+    if args.videowidth > 0 and args.videowidth < to_show.shape[1]:
+        xoffs = (to_show.shape[1]-args.videowidth)//2
+        to_show = to_show[:,xoffs:-xoffs]
+    if args.videoheight > 0 and args.videoheight < to_show.shape[0]:
+        yoffs = (to_show.shape[0]-args.videoheight)//2
+        to_show = to_show[yoffs:-yoffs, :]
+
+    cv2.imshow("grid", to_show)
     k = cv2.waitKey(1)
     if k==27:
         exit()
