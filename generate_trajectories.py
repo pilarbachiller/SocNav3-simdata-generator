@@ -241,6 +241,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 person["y"] = human.y
                 person["angle"] = human.orientation
                 person["speed"] = human.speed
+                people.append(person)
 
                 obj = {}
                 obj["id"] = laptop.id
@@ -285,8 +286,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         for o in objects:
             if o['type'] == "plant":
                 c = self.world_to_grid((o['x'], o['y']))
-                r_p = self.world_to_grid((o['x']+o['size'][0], o['y']))
-                r = abs(c[0]-r_p[0])
+                r = int(o['size'][0]/(2*GRID_CELL_SIZE))
                 cv2.circle(grid, c, r, 1, -1)
             else:
                 points = []
