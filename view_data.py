@@ -27,8 +27,6 @@ import argparse
 IMAGE_SIDE = 1800
 HUMAN_RADIUS = 0.55 / 2.
 HUMAN_DEPTH =  0.20 / 2.
-ROBOT_RADIUS = 0.25
-GOAL_RADIUS =  0.30
 
 parser = argparse.ArgumentParser(
                     prog='view_data',
@@ -59,6 +57,12 @@ def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_
     pGx = (pW[0])/GRID_CELL_SIZEX + GRID_WIDTH/2
     pGy = (pW[1])/GRID_CELL_SIZEY + GRID_HEIGHT/2
     return pGx, pGy
+
+def rad_to_degrees(rad):
+    deg = rad*180/np.pi
+    if deg < 0:
+        deg = 360+deg
+    return deg
 
 def rotate_points(points, center, angle):
     r_points = []
@@ -115,6 +119,9 @@ def draw_person(p, canvas, map_multX, map_multY):
     cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
 
 def draw_robot_and_goal(r, local_grid):
+    ROBOT_RADIUS = r["radius"]
+    GOAL_RADIUS = r["goal_pos_th"]
+    
     # DRAW ROBOT
     x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
@@ -139,7 +146,20 @@ def draw_robot_and_goal(r, local_grid):
     r_p = world_to_grid_float((r['goal_x']+GOAL_RADIUS, r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    cv2.circle(local_grid, c, rad, [0, 255, 0], 2)
+
+    startAngle = np.arctan2(np.sin(r['goal_angle']-r['goal_angle_th']), np.cos(r['goal_angle']-r['goal_angle_th']))
+    startAngle = rad_to_degrees(startAngle)
+    endAngle = np.arctan2(np.sin(r['goal_angle']+r['goal_angle_th']), np.cos(r['goal_angle']+r['goal_angle_th']))
+    endAngle = rad_to_degrees(endAngle)
+    # print(angle, startAngle, endAngle)
+    cv2.ellipse(local_grid, c, (rad, rad), 0, startAngle, endAngle, [0, 180, 0], -1)
+
+    cv2.circle(local_grid, c, rad, [0, 100, 0], 2)
+    x_a = r['goal_x'] + (GOAL_RADIUS)*np.cos(r['goal_angle'])
+    y_a = r['goal_y'] + (GOAL_RADIUS)*np.sin(r['goal_angle'])
+    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    cv2.line(local_grid, c, a, [0, 100, 0], 2)
+
 
 
 def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):

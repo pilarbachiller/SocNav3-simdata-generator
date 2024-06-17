@@ -268,6 +268,13 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot["goal_x"] = self.env.robot.goal_x
         robot["goal_y"] = self.env.robot.goal_y
 
+        # read this information from somewhere...
+        robot["radius"] = 0.35
+        robot["goal_angle"] = 0
+        robot["goal_pos_th"] = 0.5
+        robot["goal_angle_th"] = np.pi
+
+
         return people, objects, walls, interactions, robot
 
     def generate_grid(self, objects, walls):
