@@ -120,8 +120,8 @@ def draw_person(p, canvas, map_multX, map_multY):
 
 def draw_robot_and_goal(r, local_grid):
     ROBOT_RADIUS = r["radius"]
-    GOAL_RADIUS = r["goal_pos_th"]
-    
+    GOAL_RADIUS = r["radius"] + r["goal_pos_th"]
+
     # DRAW ROBOT
     x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
