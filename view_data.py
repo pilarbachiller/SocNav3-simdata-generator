@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import time, sys
+import time, sys, os
 import numpy as np
 import cv2
 import json
@@ -27,13 +27,11 @@ import argparse
 IMAGE_SIDE = 1800
 HUMAN_RADIUS = 0.55 / 2.
 HUMAN_DEPTH =  0.20 / 2.
-ROBOT_RADIUS = 0.25
-GOAL_RADIUS =  0.30
 
 parser = argparse.ArgumentParser(
                     prog='view_data',
                     description='Displays social navigation interactions')
-parser.add_argument('file', metavar='N', type=str, nargs="?")
+parser.add_argument('files', metavar='N', type=str, nargs="+")
 parser.add_argument('--leftcrop', type=int, nargs="?", default=0., help='left cropping')
 parser.add_argument('--topcrop', type=int, nargs="?", default=0., help='top cropping')
 parser.add_argument('--rightcrop', type=int, nargs="?", default=0., help='right cropping')
@@ -41,9 +39,15 @@ parser.add_argument('--bottomcrop', type=int, nargs="?", default=0., help='botto
 parser.add_argument('--rotate', type=float, nargs="?", default=0., help='how much to add to angle') # -120.5``
 parser.add_argument('--videowidth', type=int, help='video width', required=True)
 parser.add_argument('--videoheight', type=int, help='video height', required=True)
+parser.add_argument('--dir', type=str, nargs="?", default="./videos", help="output directory for the generated videos")
 
 
 args = parser.parse_args()
+
+output_dir = args.dir
+if not os.path.isdir(output_dir):
+    os.mkdir(output_dir)
+print("Videos will be saved in", output_dir)
 
 def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH):
     pGx, pGy = world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
@@ -53,6 +57,12 @@ def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_
     pGx = (pW[0])/GRID_CELL_SIZEX + GRID_WIDTH/2
     pGy = (pW[1])/GRID_CELL_SIZEY + GRID_HEIGHT/2
     return pGx, pGy
+
+def rad_to_degrees(rad):
+    deg = rad*180/np.pi
+    if deg < 0:
+        deg = 360+deg
+    return deg
 
 def rotate_points(points, center, angle):
     r_points = []
@@ -109,6 +119,9 @@ def draw_person(p, canvas, map_multX, map_multY):
     cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
 
 def draw_robot_and_goal(r, local_grid):
+    ROBOT_RADIUS = r["radius"]
+    GOAL_RADIUS = r["radius"] + r["goal_pos_th"]
+
     # DRAW ROBOT
     x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
@@ -133,7 +146,20 @@ def draw_robot_and_goal(r, local_grid):
     r_p = world_to_grid_float((r['goal_x']+GOAL_RADIUS, r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    cv2.circle(local_grid, c, rad, [0, 255, 0], 2)
+
+    startAngle = np.arctan2(np.sin(r['goal_angle']-r['goal_angle_th']), np.cos(r['goal_angle']-r['goal_angle_th']))
+    startAngle = rad_to_degrees(startAngle)
+    endAngle = np.arctan2(np.sin(r['goal_angle']+r['goal_angle_th']), np.cos(r['goal_angle']+r['goal_angle_th']))
+    endAngle = rad_to_degrees(endAngle)
+    # print(angle, startAngle, endAngle)
+    cv2.ellipse(local_grid, c, (rad, rad), 0, startAngle, endAngle, [0, 180, 0], -1)
+
+    cv2.circle(local_grid, c, rad, [0, 100, 0], 2)
+    x_a = r['goal_x'] + (GOAL_RADIUS)*np.cos(r['goal_angle'])
+    y_a = r['goal_y'] + (GOAL_RADIUS)*np.sin(r['goal_angle'])
+    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    cv2.line(local_grid, c, a, [0, 100, 0], 2)
+
 
 
 def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
@@ -178,113 +204,116 @@ def draw_object(o, canvas):
 
 #INITIALIZATIONS
 
-print(args.file)
+for file_name in args.files:
 
-data = json.load(open(args.file, 'r'))
-grid = data["grid"]["data"]
-GRID_HEIGHT = data["grid"]["height"]
-GRID_WIDTH = data["grid"]["width"]
-GRID_CELL_SIZE = data["grid"]["cell_size"]
-grid = np.array(grid, np.int8)
+    print(file_name)
 
-v2gray = {-1:[128, 128, 128], 0: [255, 255, 255], 1: [0, 0, 0]}
-global_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH, 3), np.uint8)
-for y in range(grid.shape[0]):
-    for x in range(grid.shape[1]):
-        global_grid[y][x] = v2gray[grid[y][x]]
+    data = json.load(open(file_name, 'r'))
+    grid = data["grid"]["data"]
+    GRID_HEIGHT = data["grid"]["height"]
+    GRID_WIDTH = data["grid"]["width"]
+    GRID_CELL_SIZE = data["grid"]["cell_size"]
+    grid = np.array(grid, np.int8)
 
-scaleX = args.videowidth/GRID_WIDTH
-scaleY = args.videoheight/GRID_HEIGHT
-GRID_WIDTH = args.videowidth
-GRID_HEIGHT = args.videoheight
-GRID_CELL_SIZEX = GRID_CELL_SIZE/scaleX
-GRID_CELL_SIZEY = GRID_CELL_SIZE/scaleY
+    v2gray = {-1:[128, 128, 128], 0: [255, 255, 255], 1: [0, 0, 0]}
+    global_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH, 3), np.uint8)
+    for y in range(grid.shape[0]):
+        for x in range(grid.shape[1]):
+            global_grid[y][x] = v2gray[grid[y][x]]
 
-global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
+    scaleX = args.videowidth/GRID_WIDTH
+    scaleY = args.videoheight/GRID_HEIGHT
+    GRID_WIDTH = args.videowidth
+    GRID_HEIGHT = args.videoheight
+    GRID_CELL_SIZEX = GRID_CELL_SIZE/scaleX
+    GRID_CELL_SIZEY = GRID_CELL_SIZE/scaleY
 
-if args.leftcrop > 0:
-    if args.leftcrop < global_grid.shape[1]-args.rightcrop:
-        lcrop = args.leftcrop
+    global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
+
+    if args.leftcrop > 0:
+        if args.leftcrop < global_grid.shape[1]-args.rightcrop:
+            lcrop = args.leftcrop
+        else:
+            print("ignoring left crop")
     else:
-        print("ignoring left crop")
-else:
-    lcrop = 0
-if args.rightcrop > 0:
-    if args.rightcrop < global_grid.shape[1]-args.leftcrop:
-        rcrop = args.rightcrop
+        lcrop = 0
+    if args.rightcrop > 0:
+        if args.rightcrop < global_grid.shape[1]-args.leftcrop:
+            rcrop = args.rightcrop
+        else:
+            print("ignoring right crop")
     else:
-        print("ignoring right crop")
-else:
-    rcrop = 0
-if args.topcrop > 0:
-    if args.topcrop < global_grid.shape[0]-args.bottomcrop:
-        tcrop = args.topcrop
+        rcrop = 0
+    if args.topcrop > 0:
+        if args.topcrop < global_grid.shape[0]-args.bottomcrop:
+            tcrop = args.topcrop
+        else:
+            print("ignoring top crop")
     else:
-        print("ignoring top crop")
-else:
-    tcrop = 0
-if args.bottomcrop > 0:
-    if args.bottomcrop < global_grid.shape[0]-args.topcrop:
-        bcrop = args.bottomcrop
+        tcrop = 0
+    if args.bottomcrop > 0:
+        if args.bottomcrop < global_grid.shape[0]-args.topcrop:
+            bcrop = args.bottomcrop
+        else:
+            print("ignoring bottom crop")
     else:
-        print("ignoring bottom crop")
-else:
-    bcrop = 0
+        bcrop = 0
 
-images_for_video = []
-last_timestamp = -1
-for s in data["sequence"]:
-    local_grid = copy.deepcopy(global_grid)
-    # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
-    # cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
+    images_for_video = []
+    last_timestamp = -1
+    for s in data["sequence"]:
+        local_grid = copy.deepcopy(global_grid)
+        # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
+        # cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
 
-    # DRAW OBJECTS
-    for o in s["objects"]:
-        draw_object(o, local_grid)
+        # DRAW OBJECTS
+        for o in s["objects"]:
+            draw_object(o, local_grid)
 
-    # DRAW HUMANS
-    for p in s["people"]:
-        draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY)
+        # DRAW HUMANS
+        for p in s["people"]:
+            draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY)
 
-    # DRAW ROBOT AND GOAL
-    if s["robot"]['x'] is None:
-        continue
-        
-    draw_robot_and_goal(s["robot"], local_grid)
+        # DRAW ROBOT AND GOAL
+        if s["robot"]['x'] is None:
+            continue
+            
+        draw_robot_and_goal(s["robot"], local_grid)
 
-    # DRAW WALLS
-    for w in s["walls"]:
-        p1 = (w[0], w[1])
-        p2 = (w[2], w[3])
-        p1G = world_to_grid(p1, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-        p2G = world_to_grid(p2, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-        cv2.line(local_grid, p1G, p2G, [0, 0, 255], 8)
+        # DRAW WALLS
+        for w in s["walls"]:
+            p1 = (w[0], w[1])
+            p2 = (w[2], w[3])
+            p1G = world_to_grid(p1, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+            p2G = world_to_grid(p2, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+            cv2.line(local_grid, p1G, p2G, [0, 0, 255], 8)
 
-    visible_grid = cv2.flip(local_grid, 0)                
+        visible_grid = cv2.flip(local_grid, 0)                
 
-    R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[1]//2), args.rotate, 1.0)
-    to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))
+        R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[1]//2), args.rotate, 1.0)
+        to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))
 
 
-    to_show = to_show[tcrop:-bcrop-1,lcrop:-rcrop-1]
+        to_show = to_show[tcrop:-bcrop-1,lcrop:-rcrop-1]
 
-    images_for_video.append(to_show)
-    cv2.imshow("grid", to_show)
-    k = cv2.waitKey(1)
-    if k==27:
-        exit()
+        images_for_video.append(to_show)
+        cv2.imshow("grid", to_show)
+        k = cv2.waitKey(1)
+        if k==27:
+            exit()
 
-    sleeptime = s["timestamp"]-last_timestamp
-    if last_timestamp == -1:
-        sleeptime = 0
-    last_timestamp = s["timestamp"]
-    time.sleep(sleeptime)
+        sleeptime = s["timestamp"]-last_timestamp
+        if last_timestamp == -1:
+            sleeptime = 0
+        last_timestamp = s["timestamp"]
+        time.sleep(sleeptime)
 
-ini_episode = data["sequence"][0]["timestamp"]
-end_episode = data["sequence"][-1]["timestamp"]
-fps = len(images_for_video)/(end_episode-ini_episode)
-fourcc =  cv2.VideoWriter_fourcc(*'MP4V')
-writer = cv2.VideoWriter('prueba.mp4', fourcc, fps, (images_for_video[0].shape[1], images_for_video[0].shape[0])) 
-for image in images_for_video:
-    writer.write(image)
-writer.release()
+    ini_episode = data["sequence"][0]["timestamp"]
+    end_episode = data["sequence"][-1]["timestamp"]
+    fps = len(images_for_video)/(end_episode-ini_episode)
+    fourcc =  cv2.VideoWriter_fourcc(*'MP4V')
+    output_file = file_name.split("/")[-1].split(".")[0] + ".mp4"
+    writer = cv2.VideoWriter(os.path.join(output_dir, output_file), fourcc, fps, (images_for_video[0].shape[1], images_for_video[0].shape[0])) 
+    for image in images_for_video:
+        writer.write(image)
+    writer.release()
