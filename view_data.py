@@ -262,7 +262,7 @@ for s in data["sequence"]:
 
     visible_grid = cv2.flip(local_grid, 0)                
 
-    R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[0]//2), args.rotate, 1.0)
+    R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[1]//2), args.rotate, 1.0)
     to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))
 
 
