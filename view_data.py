@@ -122,25 +122,6 @@ def draw_robot_and_goal(r, local_grid):
     ROBOT_RADIUS = r["radius"]
     GOAL_RADIUS = r["radius"] + r["goal_pos_th"]
 
-    # DRAW ROBOT
-    x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
-    y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
-    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    x_pa1 = r['x'] - (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
-    y_pa1 = r['y'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
-    x_pa2 = r['x'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
-    y_pa2 = r['y'] - (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
-    pa1 = world_to_grid((x_pa1, y_pa1), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    pa2 = world_to_grid((x_pa2, y_pa2), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    c = world_to_grid_float((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    rad = int(abs(c[0]-r_p[0]))
-    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
-    cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
-    cv2.line(local_grid, c, a, [107, 36, 0], 2)
-    cv2.line(local_grid, pa1, pa2, [107, 36, 0], 2)
-
     # DRAW GOAL
     c = world_to_grid_float((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     r_p = world_to_grid_float((r['goal_x']+GOAL_RADIUS, r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
@@ -159,6 +140,24 @@ def draw_robot_and_goal(r, local_grid):
     a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
     cv2.line(local_grid, c, a, [0, 100, 0], 2)
 
+    # DRAW ROBOT
+    x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
+    y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
+    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    x_pa1 = r['x'] - (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
+    y_pa1 = r['y'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
+    x_pa2 = r['x'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
+    y_pa2 = r['y'] - (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
+    pa1 = world_to_grid((x_pa1, y_pa1), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    pa2 = world_to_grid((x_pa2, y_pa2), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    c = world_to_grid_float((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    rad = int(abs(c[0]-r_p[0]))
+    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
+    cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
+    cv2.line(local_grid, c, a, [107, 36, 0], 2)
+    cv2.line(local_grid, pa1, pa2, [107, 36, 0], 2)
 
 
 def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
