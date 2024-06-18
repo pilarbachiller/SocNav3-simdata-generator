@@ -15,9 +15,9 @@ import socnavgym
 import gym
 
 UPDATE_PERIOD = 0.1
-GRID_WIDTH = 175 # size in cells
-GRID_HEIGHT = 175 # size in cells
-GRID_CELL_SIZE = 0.06 # size in meters. Square cells are assumed
+GRID_WIDTH = 300 # size in cells
+GRID_HEIGHT = 300 # size in cells
+GRID_CELL_SIZE = 0.035 # size in meters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def __init__(self):
@@ -198,7 +198,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj["x"] = o.x
             obj["y"] = o.y
             obj["angle"] = o.orientation
-            obj["size"] = [o.radius, o.radius]
+            obj["size"] = [o.radius*2, o.radius*2]
             obj["type"] = "plant"
             objects.append(obj)
 
@@ -269,9 +269,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot["goal_y"] = self.env.robot.goal_y
 
         # read this information from somewhere...
-        robot["radius"] = 0.35
+        robot["radius"] = 0.25
         robot["goal_angle"] = 0
-        robot["goal_pos_th"] = 0.5
+        robot["goal_pos_th"] = 0.2
         robot["goal_angle_th"] = np.pi
 
 
@@ -372,9 +372,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 f.close()
         except Exception as e:
             print("format problem in json")
-            print(final_data["sequence"])
             print(e)
-            exit()
+            return
 
         fps = len(self.images_for_video)/(self.end_episode-self.ini_episode)
         fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4

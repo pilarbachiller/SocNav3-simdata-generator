@@ -8,12 +8,12 @@ episode:
     end_with_collision: False
 
 robot:
-    robot_radius: 0.35  # radius of the robot
-    goal_radius: 0.5  # radius of the goal
+    robot_radius: 0.25  # radius of the robot
+    goal_radius: 0.2  # radius of the goal
     robot_type: "diff-drive"  # there are two types, diff-drive or holonomic
 
 human:
-    human_diameter: 0.72  # diameter of the human
+    human_diameter: 0.55  # diameter of the human
     human_goal_radius: 0.25  # radius of human's goal
     human_policy: "random"  # policy of the human. Can be "random", "sfm", or "orca"
     gaze_angle: 3.14159  # gaze value for humans would be set to 1 when the robot lies between -gaze_angle/2 and +gaze_angle/2
@@ -25,7 +25,7 @@ laptop:
     laptop_length: 0.35  # length of the laptop
 
 plant:
-    plant_radius: 0.37  # radius of the plant
+    plant_radius: 0.3  # radius of the plant
 
 table:
     table_width: 0.9  # width of the laptop
