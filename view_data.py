@@ -147,7 +147,6 @@ def draw_robot_and_goal(r, local_grid):
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((r['goal_x'], r['goal_y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
 
-    r['goal_angle_th'] = 0.3
     startAngle = np.arctan2(np.sin(r['goal_angle']-r['goal_angle_th']), np.cos(r['goal_angle']-r['goal_angle_th']))
     startAngle = rad_to_degrees(startAngle)
     endAngle = np.arctan2(np.sin(r['goal_angle']+r['goal_angle_th']), np.cos(r['goal_angle']+r['goal_angle_th']))
