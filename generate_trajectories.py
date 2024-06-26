@@ -14,6 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
 import socnavgym
 import gym
 
+SHOW_GRID = False
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 300 # size in cells
 GRID_HEIGHT = 300 # size in cells
@@ -52,6 +53,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         pygame.init()
         pygame.joystick.init()
         self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count==0:
+            self.joystick = None
+            return
         self.joystick = pygame.joystick.Joystick(0)
         self.joystick.init()
         axes = self.joystick.get_numaxes()
@@ -111,15 +115,19 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
 
     def get_robot_movement(self):
-        pygame.event.pump()
-        for i in range(self.joystick_count):
-            axes = self.joystick.get_numaxes()
-            for axis in range(axes):
-                self.values[axis] = self.joystick.get_axis(axis)-self.centre[axis]
+        if self.joystick is not None:
+            pygame.event.pump()
+            for i in range(self.joystick_count):
+                axes = self.joystick.get_numaxes()
+                for axis in range(axes):
+                    self.values[axis] = self.joystick.get_axis(axis)-self.centre[axis]
 
-        vel_x = -self.values[1]/self.max_values[1]
-        vel_y = -self.values[0]/self.max_values[0]
-        vel_a = -self.values[4]/self.max_values[4]
+            vel_x = -self.values[1]/self.max_values[1]
+            vel_y = -self.values[0]/self.max_values[0]
+            vel_a = -self.values[4]/self.max_values[4]
+        else:
+            vel_x, vel_y, vel_a = 0, 0, 0
+
         if self.env.robot.type == "diff-drive": vel_y = 0
         return [vel_x, vel_y, vel_a]
 
@@ -128,7 +136,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot_vel = self.get_robot_movement()
         obs, reward, terminated, truncated, info = self.env.step(robot_vel) 
 
-        print(info['DISCOMFORT_SNGNN'])
+        # print(info['DISCOMFORT_SNGNN'])
 
         image = self.env.render_without_showing(draw_human_goal=False)
         image = image.astype(np.uint8)
@@ -145,7 +153,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         observation = {}
         observation["timestamp"] = self.simulation_time
-        observation["SNGNN"] = info['DISCOMFORT_SNGNN']
+        # observation["SNGNN"] = info['DISCOMFORT_SNGNN']
         observation["robot"] = robot
         observation["people"] = people
         observation["objects"] = objects
@@ -308,18 +316,18 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                     g_points.append([int(w_p[0]), int(w_p[1])])
                 cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
 
-        
-        v2gray = {-1:128, 0: 255, 1: 0}
-        visible_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
-        for y in range(grid.shape[0]):
-            for x in range(grid.shape[1]):
-                visible_grid[y][x] = v2gray[grid[y][x]]
+        if SHOW_GRID:        
+            v2gray = {-1:128, 0: 255, 1: 0}
+            visible_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.uint8)
+            for y in range(grid.shape[0]):
+                for x in range(grid.shape[1]):
+                    visible_grid[y][x] = v2gray[grid[y][x]]
 
-        visible_grid = cv2.flip(visible_grid, 0)                
-        # grid_resize = cv2.resize(visible_grid, (400, 400))
+            visible_grid = cv2.flip(visible_grid, 0)                
 
-        cv2.imshow("grid", visible_grid)
-        cv2.waitKey(1)
+            cv2.imshow("grid", visible_grid)
+            cv2.waitKey(1)
+
         return grid
         
 
