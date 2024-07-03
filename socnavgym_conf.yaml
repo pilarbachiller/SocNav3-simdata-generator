@@ -19,6 +19,8 @@ human:
     gaze_angle: 3.14159  # gaze value for humans would be set to 1 when the robot lies between -gaze_angle/2 and +gaze_angle/2
     fov_angle: 6.2831853  # the frame of view for humans
     prob_to_avoid_robot: 0.5  # the probability that the human would consider the robot in it's policy 
+    pos_noise_std: 0.01
+    angle_noise_std: 0.05
 
 laptop:
     laptop_width: 0.18  # width of the laptop
