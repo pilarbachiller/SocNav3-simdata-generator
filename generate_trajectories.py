@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
 import socnavgym
 import gym
 
-SHOW_GRID = False
+SHOW_GRID = True
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 300 # size in cells
 GRID_HEIGHT = 300 # size in cells
@@ -53,6 +53,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         pygame.init()
         pygame.joystick.init()
         self.joystick_count = pygame.joystick.get_count()
+        print(self.joystick_count)
         if self.joystick_count==0:
             self.joystick = None
             return
@@ -191,14 +192,19 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             people.append(person)
 
         objects = []
-        for o in self.env.laptops + self.env.tables:
+        for o in self.env.laptops + self.env.tables + self.env.chairs:
             obj = {}
             obj["id"] = o.id
             obj["x"] = o.x
             obj["y"] = o.y
             obj["angle"] = o.orientation
             obj["size"] = [o.width, o.length]
-            obj["type"] = "laptop" if o in self.env.laptops else "table"
+            if o in self.env.laptops:
+                obj["type"] = "laptop"
+            elif o in self.env.tables:
+                obj["type"] = "table"
+            else:
+                obj["type"] = "chair"
             objects.append(obj)
         for o in self.env.plants:
             obj = {}

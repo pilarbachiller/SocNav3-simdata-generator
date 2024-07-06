@@ -30,8 +30,12 @@ plant:
     plant_radius: 0.3  # radius of the plant
 
 table:
-    table_width: 0.9  # width of the laptop
-    table_length: 0.8  # length of the laptop
+    table_width: 0.9  # width of the table
+    table_length: 0.8  # length of the table
+
+chair:
+    chair_width: 0.6  # width of the chair
+    chair_length: 0.5  # length of the chair
 
 wall:
     wall_thickness: 0.01  # thickness of the walls
@@ -69,6 +73,9 @@ env:
 
     min_tables: 1  # minimum no. of tables
     max_tables: 2  # maximum no. of tables  
+
+    min_chairs: 1  # minimum no. of tables
+    max_chairs: 2  # maximum no. of tables  
 
     min_plants: 1  # minimum no. of plants
     max_plants: 3  # maximum no. of plants  
