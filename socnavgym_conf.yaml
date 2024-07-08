@@ -32,10 +32,16 @@ plant:
 table:
     table_width: 0.9  # width of the table
     table_length: 0.8  # length of the table
+    table_width_margin: 0.2  # width margin of the table
+    table_length_margin: 0.2  # length margin of the table
+
 
 chair:
     chair_width: 0.6  # width of the chair
     chair_length: 0.5  # length of the chair
+    chair_width_margin: 0.1  # width of the chair
+    chair_length_margin: 0.1  # length of the chair
+
 
 wall:
     wall_thickness: 0.01  # thickness of the walls

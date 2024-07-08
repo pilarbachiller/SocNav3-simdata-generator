@@ -53,7 +53,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         pygame.init()
         pygame.joystick.init()
         self.joystick_count = pygame.joystick.get_count()
-        print(self.joystick_count)
         if self.joystick_count==0:
             self.joystick = None
             return
