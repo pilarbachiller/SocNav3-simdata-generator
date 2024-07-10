@@ -121,7 +121,7 @@ def draw_person(p, canvas, map_multX, map_multY):
     cv2.putText(canvas, str(p["id"]),
     org=(pts[0], pts[1]),
     fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    fontScale=0.8,
+    fontScale=1.5,
     color=(0, 0, 255))
 
 
@@ -205,6 +205,14 @@ def draw_object(o, canvas):
         cF = (200,200,200)
         cL = (140,140,140)
         draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], o["size"][0], o["size"][1], cF, cL)
+
+    w_p = world_to_grid((o["x"], o["y"]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+
+    cv2.putText(canvas, str(o["id"]),
+    org=(int(w_p[0]), int(w_p[1])),
+    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+    fontScale=1.5,
+    color=(0, 0, 255))
 
 
 #INITIALIZATIONS
