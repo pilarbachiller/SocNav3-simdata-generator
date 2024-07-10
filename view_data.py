@@ -118,6 +118,13 @@ def draw_person(p, canvas, map_multX, map_multY):
     pts = pts.astype(np.int32)
     cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
 
+    cv2.putText(canvas, str(p["id"]),
+    org=(pts[0], pts[1]),
+    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+    fontScale=0.8,
+    color=(0, 0, 255))
+
+
 def draw_robot_and_goal(r, local_grid):
     ROBOT_RADIUS = r["radius"]
     GOAL_RADIUS = r["radius"] + r["goal_pos_th"]
