@@ -78,7 +78,7 @@ def rotate(x, y, radians):
     yy = x * np.cos(radians) + y * np.sin(radians)
     return [xx, yy]
 
-def draw_person(p, canvas, map_multX, map_multY):
+def draw_person(p, canvas, map_multX, map_multY, color):
     w = HUMAN_RADIUS
     d = HUMAN_DEPTH
     a = p["angle"]
@@ -104,7 +104,8 @@ def draw_person(p, canvas, map_multX, map_multY):
     pts[:,0] = ((pts[:,0])*map_multX)+canvas.shape[0]/2
     pts[:,1] = canvas.shape[0]/2-(-(pts[:,1])*map_multY)
     pts = pts.reshape((1,-1,2)).astype(np.int32)
-    cv2.fillPoly(canvas, pts, (20, 20, 60))
+    print(type(color))
+    cv2.fillPoly(canvas, pts, color) #(20, 20, 60))
 
     pts = np.array(rotate(0, 0.05, a)) + offset
     pts[0] = ((pts[0])*map_multX)+canvas.shape[0]/2
@@ -118,11 +119,11 @@ def draw_person(p, canvas, map_multX, map_multY):
     pts = pts.astype(np.int32)
     cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
 
-    cv2.putText(canvas, str(p["id"]),
-    org=(pts[0], pts[1]),
-    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    fontScale=1.5,
-    color=(0, 0, 255))
+    # cv2.putText(canvas, str(p["id"]),
+    # org=(pts[0], pts[1]),
+    # fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+    # fontScale=1.5,
+    # color=(0, 0, 255))
 
 
 def draw_robot_and_goal(r, local_grid):
@@ -206,13 +207,12 @@ def draw_object(o, canvas):
         cL = (140,140,140)
         draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], o["size"][0], o["size"][1], cF, cL)
 
-    w_p = world_to_grid((o["x"], o["y"]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-
-    cv2.putText(canvas, str(o["id"]),
-    org=(int(w_p[0]), int(w_p[1])),
-    fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    fontScale=1.5,
-    color=(0, 0, 255))
+    # w_p = world_to_grid((o["x"], o["y"]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+    # cv2.putText(canvas, str(o["id"]),
+    # org=(int(w_p[0]), int(w_p[1])),
+    # fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+    # fontScale=1.5,
+    # color=(0, 0, 255))
 
 
 #INITIALIZATIONS
@@ -274,10 +274,11 @@ for file_name in args.files:
 
     images_for_video = []
     last_timestamp = -1
+    human_colors = {}
     for s in data["sequence"]:
         local_grid = copy.deepcopy(global_grid)
         # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
-        # cv2.line(local_grid, (IMAGE_SIDE//2, 0), (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
+        # cv2.line(local_grid, (IMAGE_SIDE//2, 0),human_colors[p["id"]] (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
 
         # DRAW OBJECTS
         for o in s["objects"]:
@@ -285,7 +286,13 @@ for file_name in args.files:
 
         # DRAW HUMANS
         for p in s["people"]:
-            draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY)
+            if p["id"] in human_colors.keys():
+                color = human_colors[p["id"]]
+            else:
+                color = tuple(np.random.choice(range(256), size=3).astype(np.uint8))
+                human_colors[p["id"]] = color
+            print(color)
+            draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY, (int(color[0]), int(color[1]), int(color[2])))
 
         # DRAW ROBOT AND GOAL
         if s["robot"]['x'] is None:
