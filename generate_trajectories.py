@@ -187,7 +187,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             person["x"] = human.x
             person["y"] = human.y
             person["angle"] = human.orientation
-            person["speed"] = human.speed
             people.append(person)
 
         objects = []
@@ -232,7 +231,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                     person["x"] = human.x
                     person["y"] = human.y
                     person["angle"] = human.orientation
-                    person["speed"] = human.speed
                     people.append(person)
 
                 for i in range(len(interaction.humans)):
@@ -253,7 +251,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 person["x"] = human.x
                 person["y"] = human.y
                 person["angle"] = human.orientation
-                person["speed"] = human.speed
                 people.append(person)
 
                 obj = {}
