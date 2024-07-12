@@ -104,7 +104,6 @@ def draw_person(p, canvas, map_multX, map_multY, color):
     pts[:,0] = ((pts[:,0])*map_multX)+canvas.shape[0]/2
     pts[:,1] = canvas.shape[0]/2-(-(pts[:,1])*map_multY)
     pts = pts.reshape((1,-1,2)).astype(np.int32)
-    print(type(color))
     cv2.fillPoly(canvas, pts, color) #(20, 20, 60))
 
     pts = np.array(rotate(0, 0.05, a)) + offset
@@ -182,6 +181,65 @@ def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
         cv2.fillPoly(canvas, [np.array(g_points, np.int32)], colorF) 
         cv2.polylines(canvas, [np.array(g_points, np.int32)], True, colorL, 4) 
 
+def draw_chair(canvas, c, angle, w, l, colorF, colorL):        
+        object_points = []
+
+        s1 = 0.1
+        s2 = 0.2
+
+        p1 = [-w / 2, -l / 2]
+        p2 = [w / 2, -l / 2]
+        p3 = [w / 2, -l / 2  + l * s1]        
+        p4 = [-w / 2, -l / 2 + l * s1]
+
+        part_points = [p1, p2, p3, p4]
+
+        object_points.append(part_points)
+
+        p5 = [-w / 2, -l / 2 + l * s2]
+        p6 = [-w / 2 + w * s1 , -l / 2 + l * s2]
+        p7 = [-w / 2 + w * s1 , l / 2]
+        p8 = [-w / 2, l / 2]
+
+        part_points = [p5, p6, p7, p8]
+
+        object_points.append(part_points)
+
+        p9 = [w / 2, -l / 2 + l * s2]
+        p10 = [w / 2 - w * s1 , -l / 2 + l * s2]
+        p11 = [w / 2 - w * s1 , l / 2]
+        p12 = [w / 2, l / 2]
+
+        part_points = [p9, p10, p11, p12]
+
+        object_points.append(part_points)
+
+        p13 = [-w / 2 + w * s2, -l / 2 + l * s2]
+        p14 = [w / 2 - w * s2, -l / 2 + l * s2]
+        p15 = [w / 2 - w * s2, l / 2]
+        p16 = [-w / 2 + w * s2, l / 2]
+
+        part_points = [p13, p14, p15, p16]
+
+        object_points.append(part_points)
+
+        im_op = []
+        for op in object_points:
+            pp = []
+            for p in op:
+                ip = [0]*2
+                ip[0] = (c[0] - p[0] * np.sin(angle) + p[1] * np.cos(angle))
+                ip[1] = (c[1] + p[0] * np.cos(angle) + p[1] * np.sin(angle))
+                ip = world_to_grid(tuple(ip), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
+                pp.append(ip)
+            im_op.append(pp)
+
+        for ip in im_op:
+            points = np.array(ip)
+            points = points.reshape((-1, 1, 2))
+            cv2.fillPoly(canvas, [np.int32(points)], colorF, cv2.LINE_AA)  # filling the rectangle made from the points with the specified color
+            cv2.polylines(canvas, [np.int32(points)], True, colorL, 2, cv2.LINE_AA)  # bordering the rectangle
+
 
 def draw_object(o, canvas):
     if o["type"] == "table":
@@ -202,6 +260,10 @@ def draw_object(o, canvas):
         r = abs(c[0]-r_p[0])
         cv2.circle(canvas, c, r, (29, 67, 105), -1)
         cv2.circle(canvas, c, r//2, (0, 200, 0), -1)
+    elif o["type"] == "chair":        
+        cF = (200,200,200)
+        cL = (140,140,140)
+        draw_chair(canvas, (o["x"], o["y"]), o["angle"], o["size"][0], o["size"][1], cF, cL)
     else:
         cF = (200,200,200)
         cL = (140,140,140)
@@ -291,7 +353,6 @@ for file_name in args.files:
             else:
                 color = tuple(np.random.choice(range(256), size=3).astype(np.uint8))
                 human_colors[p["id"]] = color
-            print(color)
             draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY, (int(color[0]), int(color[1]), int(color[2])))
 
         # DRAW ROBOT AND GOAL
