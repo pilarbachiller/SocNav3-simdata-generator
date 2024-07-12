@@ -29,7 +29,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         self.save_dir = './trajectory_dataset/'
         self.data_file_index = 0
-        self.update_data_index()
+        self.update_data_index(self.dataID.text())
         self.images_for_video = list()
         self.data = list()
 
@@ -44,6 +44,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.start_saving_button.toggled.connect(self.start_saving)
         self.regenerate_button.clicked.connect(self.regenerate)
         self.quit_button.clicked.connect(self.quit_slot)
+
+        self.dataID.textChanged.connect(self.update_data_index)
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.compute)
@@ -100,13 +102,13 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.min_values = min_values
         self.max_values = max_values
 
-    def update_data_index(self):
+    def update_data_index(self, dataID):
         if not os.path.isdir(self.save_dir):
             os.mkdir(self.save_dir)
         file_list = [f for f in os.listdir(self.save_dir) if f.endswith('.mp4')]
         max_index = -1
         for f in file_list:
-            ind_str = f.split(self.dataID.text())
+            ind_str = f.split(dataID)
             if len(ind_str)>1:
                 ind = int(ind_str[1].split('.')[0])
                 if ind > max_index:
