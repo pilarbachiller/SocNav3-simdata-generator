@@ -15,6 +15,7 @@ import socnavgym
 import gym
 
 SHOW_GRID = True
+OBJECTS_IN_GRID = False
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 300 # size in cells
 GRID_HEIGHT = 300 # size in cells
@@ -302,23 +303,24 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         cv2.fillPoly(grid, [np.array(room, np.int32)], 0)
         cv2.polylines(grid, [np.array(room, np.int32)], True, 1)
             # cv2.line(grid, p1, p2, 1, 1)
-        for o in objects:
-            if o['type'] == "plant":
-                c = self.world_to_grid((o['x'], o['y']))
-                r = int(o['size'][0]/(2*GRID_CELL_SIZE))
-                cv2.circle(grid, c, r, 1, -1)
-            else:
-                points = []
-                points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
-                points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
-                points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
-                points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
-                r_points = self.rotate_points(points, (o['x'], o['y']), o['angle'])
-                g_points = []
-                for p in r_points:
-                    w_p = self.world_to_grid(p)
-                    g_points.append([int(w_p[0]), int(w_p[1])])
-                cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
+        if OBJECTS_IN_GRID:
+            for o in objects:
+                if o['type'] == "plant":
+                    c = self.world_to_grid((o['x'], o['y']))
+                    r = int(o['size'][0]/(2*GRID_CELL_SIZE))
+                    cv2.circle(grid, c, r, 1, -1)
+                else:
+                    points = []
+                    points.append((o['x']-o['size'][0]/2, o['y']-o['size'][1]/2))
+                    points.append((o['x']+o['size'][0]/2, o['y']-o['size'][1]/2))
+                    points.append((o['x']+o['size'][0]/2, o['y']+o['size'][1]/2))
+                    points.append((o['x']-o['size'][0]/2, o['y']+o['size'][1]/2))
+                    r_points = self.rotate_points(points, (o['x'], o['y']), o['angle'])
+                    g_points = []
+                    for p in r_points:
+                        w_p = self.world_to_grid(p)
+                        g_points.append([int(w_p[0]), int(w_p[1])])
+                    cv2.fillPoly(grid, [np.array(g_points, np.int32)], 1)
 
         if SHOW_GRID:        
             v2gray = {-1:128, 0: 255, 1: 0}

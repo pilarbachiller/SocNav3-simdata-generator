@@ -342,6 +342,12 @@ for file_name in args.files:
         # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
         # cv2.line(local_grid, (IMAGE_SIDE//2, 0),human_colors[p["id"]] (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
 
+        # DRAW ROBOT AND GOAL
+        if s["robot"]['x'] is None:
+            continue
+            
+        draw_robot_and_goal(s["robot"], local_grid)
+
         # DRAW OBJECTS
         for o in s["objects"]:
             draw_object(o, local_grid)
@@ -354,12 +360,6 @@ for file_name in args.files:
                 color = tuple(np.random.choice(range(256), size=3).astype(np.uint8))
                 human_colors[p["id"]] = color
             draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY, (int(color[0]), int(color[1]), int(color[2])))
-
-        # DRAW ROBOT AND GOAL
-        if s["robot"]['x'] is None:
-            continue
-            
-        draw_robot_and_goal(s["robot"], local_grid)
 
         # DRAW WALLS
         for w in s["walls"]:

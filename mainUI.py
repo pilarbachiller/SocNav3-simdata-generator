@@ -90,7 +90,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Social Navigation Dataset Generator", None))
         self.regenerate_button.setText(QCoreApplication.translate("MainWindow", u"regenerate", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"data id", None))
-        self.dataID.setText(QCoreApplication.translate("MainWindow", u"A", None))
+        self.dataID.setText(QCoreApplication.translate("MainWindow", u"SocNavGym", None))
         self.start_saving_button.setText(QCoreApplication.translate("MainWindow", u"start saving", None))
         self.quit_button.setText(QCoreApplication.translate("MainWindow", u"quit", None))
         self.label.setText("")

@@ -59,7 +59,7 @@
        <item>
         <widget class="QLineEdit" name="dataID">
          <property name="text">
-          <string>A</string>
+          <string>SocNavGym</string>
          </property>
         </widget>
        </item>
