@@ -27,7 +27,8 @@ laptop:
     laptop_length: 0.35  # length of the laptop
 
 plant:
-    plant_radius: 0.3  # radius of the plant
+    plant_radius: 0.2  # radius of the plant
+    plant_radius_margin: 0.05  # radius margin of the plant
 
 table:
     table_width: 0.8  # width of the table
@@ -78,13 +79,13 @@ env:
     max_dynamic_humans: 4  # maximum no. of dynamic humans
 
     min_tables: 0  # minimum no. of tables
-    max_tables: 1  # maximum no. of tables  
+    max_tables: 4  # maximum no. of tables  
 
     min_chairs: 0  # minimum no. of tables
-    max_chairs: 8  # maximum no. of tables  
+    max_chairs: 6  # maximum no. of tables  
 
-    min_plants: 0 #1  # minimum no. of plants
-    max_plants: 0 #3  # maximum no. of plants  
+    min_plants: 0  # minimum no. of plants
+    max_plants: 4  # maximum no. of plants  
 
     min_laptops: 0 #1  # minimum no. of laptops
     max_laptops: 0 #1  # maximum no. of laptops  
@@ -115,8 +116,8 @@ env:
     set_shape: "square"  # can be "random", "square", "rectangle", "L" or "no-walls" 
     add_corridors: False  # True or False, whether there should be corridors in the environment. Corridors cannot be added for L shaped rooms
 
-    min_map_x: 8  # minimum size of map along x direction
-    max_map_x: 8  # maximum size of map along x direction
+    min_map_x: 7  # minimum size of map along x direction
+    max_map_x: 10  # maximum size of map along x direction
 
-    min_map_y: 8  # minimum size of map along y direction
-    max_map_y: 8  # maximum size of map along y direction
+    min_map_y: 7  # minimum size of map along y direction
+    max_map_y: 10  # maximum size of map along y direction

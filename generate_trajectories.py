@@ -17,8 +17,8 @@ import gym
 SHOW_GRID = True
 OBJECTS_IN_GRID = False
 UPDATE_PERIOD = 0.1
-GRID_WIDTH = 200 # size in cells
-GRID_HEIGHT = 200 # size in cells
+GRID_WIDTH = 250 # size in cells
+GRID_HEIGHT = 250 # size in cells
 GRID_CELL_SIZE = 0.05 # size in meters. Square cells are assumed
 
 class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
