@@ -145,7 +145,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         image = image.astype(np.uint8)
 
 
-        people, objects, walls, interactions, robot = self.get_data()
+        people, objects, walls, robot = self.get_data()
 
         if self.n_steps==0:
             self.grid = self.generate_grid(objects, walls)
@@ -161,7 +161,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         observation["people"] = people
         observation["objects"] = objects
         observation["walls"] = walls
-        observation["interactions"] = interactions
 
 
         
@@ -225,7 +224,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             y2 = wall.y + np.sin(wall.orientation)*wall.length/2
             walls.append([x1, y1, x2, y2])
 
-        interactions = []
         for interaction in self.env.moving_interactions + self.env.static_interactions + self.env.h_l_interactions:
             if interaction.name == "human-human-interaction":
                 for human in interaction.humans:
@@ -242,7 +240,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                         inter["idSrc"] = interaction.humans[i].id
                         inter["idDst"] = interaction.humans[j].id
                         inter["type"] = "human-human-interaction"
-                        interactions.append(inter)
 
             
             if interaction.name == "human-laptop-interaction":
@@ -265,11 +262,6 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 obj["type"] = "laptop"
                 objects.append(obj)
 
-                inter = {}
-                inter["idSrc"] = human.id
-                inter["idDst"] = laptop.id
-                inter["type"] = "human-laptop-interaction"
-                interactions.append(inter)
         
         robot = {}
         robot["x"] = self.env.robot.x
@@ -284,11 +276,11 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         # read this information from somewhere...
         robot["radius"] = 0.25
         robot["goal_angle"] = 0
-        robot["goal_pos_th"] = 0.2
+        robot["goal_pos_th"] = 0.1
         robot["goal_angle_th"] = np.pi
 
 
-        return people, objects, walls, interactions, robot
+        return people, objects, walls, robot
 
     def generate_grid(self, objects, walls):
         grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.int8)
