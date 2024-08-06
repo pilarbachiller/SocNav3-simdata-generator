@@ -8,8 +8,10 @@ episode:
     end_with_collision: False
 
 robot:
-    robot_radius: 0.25  # radius of the robot
-    goal_radius: 0.1  # radius of the goal
+    robot_radius: 0.3  # radius of the robot
+    robot_radius_margin: 0.1  # radius margin of the robot
+    goal_radius: 0.2  # radius of the goal
+    goal_radius_margin: 0.1  # radius margin of the goal
     robot_type: "diff-drive"  # there are two types, diff-drive or holonomic
 
 human:

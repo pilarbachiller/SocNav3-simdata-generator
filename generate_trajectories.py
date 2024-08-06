@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
 import socnavgym
 import gym
 
-SHOW_GRID = True
+SHOW_GRID = False
 OBJECTS_IN_GRID = False
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 250 # size in cells
@@ -274,9 +274,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot["goal_y"] = self.env.robot.goal_y
 
         # read this information from somewhere...
-        robot["radius"] = 0.25
+        robot["radius"] = self.env.ROBOT_RADIUS
         robot["goal_angle"] = 0
-        robot["goal_pos_th"] = 0.1
+        robot["goal_pos_th"] = self.env.GOAL_RADIUS
         robot["goal_angle_th"] = np.pi
 
 
