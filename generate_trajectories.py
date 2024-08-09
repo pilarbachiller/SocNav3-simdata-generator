@@ -16,6 +16,7 @@ import gym
 
 SHOW_GRID = False
 OBJECTS_IN_GRID = False
+SAVE_VIDEO = False
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 250 # size in cells
 GRID_HEIGHT = 250 # size in cells
@@ -106,7 +107,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
     def update_data_index(self, dataID):
         if not os.path.isdir(self.save_dir):
             os.mkdir(self.save_dir)
-        file_list = [f for f in os.listdir(self.save_dir) if f.endswith('.mp4')]
+        file_list = [f for f in os.listdir(self.save_dir) if f.endswith('.json')]
         max_index = -1
         for f in file_list:
             ind_str = f.split(dataID)
@@ -168,7 +169,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
         if not done:
             if self.simulation_time-self.last_save_simulation_time >= UPDATE_PERIOD:
-                self.images_for_video.append(cv2.resize(image, (500, 500)))
+                if SAVE_VIDEO:
+                    self.images_for_video.append(cv2.resize(image, (500, 500)))
                 self.data.append(observation)            
                 self.last_save_simulation_time = self.simulation_time
         else:
@@ -361,7 +363,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
 
     def save_data(self):
         file_name = self.dataID.text() + '{0:06d}'.format(self.data_file_index)
-
+        print("saving", file_name)
         final_data = {}
         grid_data = {}
         grid_data["width"] = GRID_WIDTH
@@ -381,12 +383,13 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             print(e)
             return
 
-        fps = len(self.images_for_video)/(self.end_episode-self.ini_episode)
-        fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4
-        writer = cv2.VideoWriter(self.save_dir + file_name + '.mp4', fourcc, fps, (self.images_for_video[0].shape[1], self.images_for_video[0].shape[0])) 
-        for image in self.images_for_video:
-            writer.write(image)
-        writer.release()
+        if SAVE_VIDEO:
+            fps = len(self.images_for_video)/(self.end_episode-self.ini_episode)
+            fourcc =  cv2.VideoWriter_fourcc(*'MP4V') # mp4
+            writer = cv2.VideoWriter(self.save_dir + file_name + '.mp4', fourcc, fps, (self.images_for_video[0].shape[1], self.images_for_video[0].shape[0])) 
+            for image in self.images_for_video:
+                writer.write(image)
+            writer.release()
 
         self.data_file_index += 1
 
