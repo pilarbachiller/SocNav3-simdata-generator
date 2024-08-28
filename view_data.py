@@ -183,6 +183,14 @@ def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
         cv2.fillPoly(canvas, [np.array(g_points, np.int32)], colorF) 
         cv2.polylines(canvas, [np.array(g_points, np.int32)], True, colorL, 4) 
 
+def draw_circular_object(canvas, c, angle, w, h, colorF, colorL):
+        g_c = world_to_grid(c, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+        g_w = int(w/GRID_CELL_SIZEX)//2
+        g_h = int(h/GRID_CELL_SIZEY)//2
+        rot = angle*180/np.pi + 90
+        cv2.ellipse(canvas, g_c, (g_w, g_h), rot, 0, 360, colorF, -1)
+        cv2.ellipse(canvas, g_c, (g_w, g_h), rot, 0, 360, colorL, 4)
+
 def draw_chair(canvas, c, angle, w, l, colorF, colorL):        
         object_points = []
 
