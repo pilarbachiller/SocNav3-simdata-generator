@@ -141,12 +141,6 @@
               },
               "angle_threshold": {
                 "type": "number"
-              },
-              "pos_th": {
-                "type": "number"
-              },
-              "angle_th": {
-                "type": "number"
               }
             },
             "required": [

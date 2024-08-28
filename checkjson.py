@@ -104,7 +104,7 @@ def manage_fixes(d, e):
         modification_made = True
         d["grid"]["angle_orig"] = 0.0
         d["grid"]["x_orig"] = -d["grid"]["cell_size"]*d["grid"]["width"]/2
-        d["grid"]["y_orig"] = +d["grid"]["cell_size"]*d["grid"]["height"]/2
+        d["grid"]["y_orig"] = -d["grid"]["cell_size"]*d["grid"]["height"]/2
         return d
 
     def fix__move_goal_into_goal(d):

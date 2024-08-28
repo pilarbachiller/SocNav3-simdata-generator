@@ -55,8 +55,8 @@ def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG
     return (int(pGx), int(pGy))
 
 def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG):
-    pGx = (pW[0])/GRID_CELL_SIZEX + GRID_WIDTH/2
-    pGy = (pW[1])/GRID_CELL_SIZEY + GRID_HEIGHT/2
+    pGx = (pW[0]-GRID_X_ORIG)/GRID_CELL_SIZEX 
+    pGy = (pW[1]-GRID_Y_ORIG)/GRID_CELL_SIZEY 
     return pGx, pGy
 
 def rad_to_degrees(rad):

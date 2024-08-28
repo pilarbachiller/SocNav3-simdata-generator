@@ -16,7 +16,7 @@ import gym
 
 SHOW_GRID = False
 OBJECTS_IN_GRID = False
-SAVE_VIDEO = False
+SAVE_VIDEO = True
 UPDATE_PERIOD = 0.1
 GRID_WIDTH = 250 # size in cells
 GRID_HEIGHT = 250 # size in cells
@@ -146,10 +146,11 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         image = image.astype(np.uint8)
 
 
-        people, objects, walls, robot = self.get_data()
+        people, objects, walls, robot, goal = self.get_data()
 
         if self.n_steps==0:
             self.grid = self.generate_grid(objects, walls)
+            self.walls = walls
 
 
         self.n_steps +=1
@@ -161,9 +162,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         observation["robot"] = robot
         observation["people"] = people
         observation["objects"] = objects
-        observation["walls"] = walls
-
-
+        observation["goal"] = goal
+        
         
         done = terminated or truncated
 
@@ -200,7 +200,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj["x"] = o.x
             obj["y"] = o.y
             obj["angle"] = o.orientation
-            obj["size"] = [o.width, o.length]
+            obj["shape"] = {}
+            obj["shape"]["type"] = "rectangle"
+            obj["shape"]["width"] = o.width
+            obj["shape"]["height"] = o.length
             if o in self.env.laptops:
                 obj["type"] = "laptop"
             elif o in self.env.tables:
@@ -214,7 +217,10 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj["x"] = o.x
             obj["y"] = o.y
             obj["angle"] = o.orientation
-            obj["size"] = [o.radius*2, o.radius*2]
+            obj["shape"] = {}
+            obj["shape"]["type"] = "circle"
+            obj["shape"]["width"] = o.radius*2
+            obj["shape"]["height"] = o.radius*2
             obj["type"] = "plant"
             objects.append(obj)
 
@@ -260,7 +266,9 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 obj["x"] = laptop.x
                 obj["y"] = laptop.y
                 obj["angle"] = laptop.orientation
-                obj["size"] = [laptop.width, laptop.length]
+                obj["shape"]["type"] = "rectangle"
+                obj["shape"]["width"] = laptop.width
+                obj["shape"]["height"] = laptop.length
                 obj["type"] = "laptop"
                 objects.append(obj)
 
@@ -272,17 +280,23 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot["speed_x"] = float(self.env.robot.vel_x)
         robot["speed_y"] = float(self.env.robot.vel_y)
         robot["speed_a"] = float(self.env.robot.vel_a)
-        robot["goal_x"] = self.env.robot.goal_x
-        robot["goal_y"] = self.env.robot.goal_y
+        robot["shape"] = {}
+        robot["shape"]["type"] = "circle"
+        robot["shape"]["width"] = self.env.ROBOT_RADIUS*2
+        robot["shape"]["height"] = self.env.ROBOT_RADIUS*2
 
-        # read this information from somewhere...
-        robot["radius"] = self.env.ROBOT_RADIUS
-        robot["goal_angle"] = 0
-        robot["goal_pos_th"] = self.env.GOAL_RADIUS
-        robot["goal_angle_th"] = np.pi
+        goal = {}
+        goal["x"] = self.env.robot.goal_x
+        goal["y"] = self.env.robot.goal_y
+        goal["angle"] = 0
+        goal["pos_threshold"] = self.env.GOAL_RADIUS
+        goal["angle_threshold"] = np.pi
+        goal["type"] = "go-to"
+        goal["human"] = None
 
 
-        return people, objects, walls, robot
+
+        return people, objects, walls, robot, goal
 
     def generate_grid(self, objects, walls):
         grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), np.int8)
@@ -369,8 +383,12 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         grid_data["width"] = GRID_WIDTH
         grid_data["height"] = GRID_HEIGHT
         grid_data["cell_size"] = GRID_CELL_SIZE
+        grid_data["x_orig"] = -GRID_CELL_SIZE*GRID_WIDTH/2
+        grid_data["y_orig"] = -GRID_CELL_SIZE*GRID_HEIGHT/2
+        grid_data["angle_orig"] = 0
         grid_data["data"] = self.grid.tolist()
         final_data["grid"] = grid_data
+        final_data["walls"] = self.walls
         final_data["sequence"] = self.data
         try:
             with open(self.save_dir+ file_name +'.json', 'w') as f:
