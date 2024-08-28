@@ -103,8 +103,8 @@ def manage_fixes(d, e):
         global modification_made
         modification_made = True
         d["grid"]["angle_orig"] = 0.0
-        d["grid"]["x_orig"] = -d["grid"]["cell_size"]*d["grid"]["width"]
-        d["grid"]["y_orig"] = +d["grid"]["cell_size"]*d["grid"]["height"]
+        d["grid"]["x_orig"] = -d["grid"]["cell_size"]*d["grid"]["width"]/2
+        d["grid"]["y_orig"] = +d["grid"]["cell_size"]*d["grid"]["height"]/2
         return d
 
     def fix__move_goal_into_goal(d):
@@ -141,8 +141,8 @@ def manage_fixes(d, e):
             robot = d["sequence"][i]["robot"]
             shape = {
                     "type": "circle",
-                    "width": robot["radius"],
-                    "height": robot["radius"]
+                    "width": robot["radius"]*2,
+                    "height": robot["radius"]*2
                 }
             del d["sequence"][i]["robot"]["radius"]
             d["sequence"][i]["robot"]["shape"] = shape
