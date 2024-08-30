@@ -191,7 +191,13 @@ def draw_circular_object(canvas, c, angle, w, h, colorF, colorL):
         cv2.ellipse(canvas, g_c, (g_w, g_h), rot, 0, 360, colorF, -1)
         cv2.ellipse(canvas, g_c, (g_w, g_h), rot, 0, 360, colorL, 4)
 
-def draw_chair(canvas, c, angle, w, l, colorF, colorL):        
+def draw_chair(canvas, c, angle, w, l, colorF, colorL, shape = "rectangle"):        
+
+        if shape == "rectangle":
+            draw_rectangular_object(canvas, c, angle, w, l, colorF, colorL)
+        else:
+            draw_circular_object(canvas, c, angle, w, l, colorF, colorL)
+
         object_points = []
 
         s1 = 0.1
@@ -224,14 +230,14 @@ def draw_chair(canvas, c, angle, w, l, colorF, colorL):
 
         object_points.append(part_points)
 
-        p13 = [-w / 2 + w * s2, -l / 2 + l * s2]
-        p14 = [w / 2 - w * s2, -l / 2 + l * s2]
-        p15 = [w / 2 - w * s2, l / 2]
-        p16 = [-w / 2 + w * s2, l / 2]
+        # p13 = [-w / 2 + w * s2, -l / 2 + l * s2]
+        # p14 = [w / 2 - w * s2, -l / 2 + l * s2]
+        # p15 = [w / 2 - w * s2, l / 2]
+        # p16 = [-w / 2 + w * s2, l / 2]
 
-        part_points = [p13, p14, p15, p16]
+        # part_points = [p13, p14, p15, p16]
 
-        object_points.append(part_points)
+        # object_points.append(part_points)
 
         im_op = []
         for op in object_points:
@@ -257,36 +263,30 @@ def draw_object(o, canvas):
     if o["type"] == "table":
         cF = (63,133,205)
         cL = (23,93,165)
-        draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
     elif o["type"] == "shelf":
         cF = (205,133,63)
         cL = (165,93,23)
-        draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
     elif o["type"] == "TV":
         cF = (100,100,100)
         cL = (100,100,100)
-        draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
     elif o["type"] == "plant":
-        c = world_to_grid((o['x'], o['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-        r_p = world_to_grid((o['x']+w/2, o['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-        r = abs(c[0]-r_p[0])
-        cv2.circle(canvas, c, r, (29, 67, 105), -1)
-        cv2.circle(canvas, c, r//2, (0, 200, 0), -1)
+        cF = (0, 200, 0)
+        cL = (29, 67, 105)
     elif o["type"] == "chair":        
         cF = (200,200,200)
         cL = (140,140,140)
-        draw_chair(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
     else:
         cF = (200,200,200)
         cL = (140,140,140)
-        draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
 
-    # w_p = world_to_grid((o["x"], o["y"]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-    # cv2.putText(canvas, str(o["id"]),
-    # org=(int(w_p[0]), int(w_p[1])),
-    # fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-    # fontScale=1.5,
-    # color=(0, 0, 255))
+    if o["type"] == "chair":
+        draw_chair(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL, o["shape"]["type"])
+    else:
+        if o["shape"]["type"] == "circle":
+            draw_circular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
+        else:
+            draw_rectangular_object(canvas, (o["x"], o["y"]), o["angle"], w, h, cF, cL)
+
 
 
 #INITIALIZATIONS
