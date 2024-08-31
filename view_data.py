@@ -25,7 +25,6 @@ import copy
 
 import argparse
 
-IMAGE_SIDE = 1800
 HUMAN_RADIUS = 0.55 / 2.
 HUMAN_DEPTH =  0.20 / 2.
 
@@ -50,19 +49,21 @@ if not os.path.isdir(output_dir):
     os.mkdir(output_dir)
 print("Videos will be saved in", output_dir)
 
-def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG):
-    pGx, pGy = world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG):
+    pGx, pGy = world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     return (int(pGx), int(pGy))
 
-def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG):
+def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG):
+    tx = pW[0]-GRID_X_ORIG
+    ty = pW[1]-GRID_Y_ORIG
+    rx = tx*np.cos(-GRID_ANGLE_ORIG) - ty*np.sin(-GRID_ANGLE_ORIG)
+    ry = tx*np.sin(-GRID_ANGLE_ORIG) - ty*np.cos(-GRID_ANGLE_ORIG)
     pGx = (pW[0]-GRID_X_ORIG)/GRID_CELL_SIZEX 
     pGy = (pW[1]-GRID_Y_ORIG)/GRID_CELL_SIZEY 
     return pGx, pGy
 
 def rad_to_degrees(rad):
     deg = rad*180/np.pi
-    # if deg < 0:
-    #     deg = 360+deg
     return deg
 
 def rotate_points(points, center, angle):
@@ -131,17 +132,17 @@ def draw_robot(r, local_grid):
 
     x_a = r['x'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     y_a = r['y'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
-    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     x_pa1 = r['x'] - (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
     y_pa1 = r['y'] + (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
     x_pa2 = r['x'] + (ROBOT_RADIUS-0.1)*np.sin(r['angle'])
     y_pa2 = r['y'] - (ROBOT_RADIUS-0.1)*np.cos(r['angle'])
-    pa1 = world_to_grid((x_pa1, y_pa1), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-    pa2 = world_to_grid((x_pa2, y_pa2), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-    c = world_to_grid_float((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-    r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    pa1 = world_to_grid((x_pa1, y_pa1), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    pa2 = world_to_grid((x_pa2, y_pa2), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    c = world_to_grid_float((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     rad = int(abs(c[0]-r_p[0]))
-    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
     cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
     cv2.line(local_grid, c, a, [107, 36, 0], 2)
@@ -151,10 +152,10 @@ def draw_goal(g, robot_radius, local_grid):
     GOAL_RADIUS = robot_radius + g["pos_threshold"]
 
     # DRAW GOAL
-    c = world_to_grid_float((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-    r_p = world_to_grid_float((g['x']+GOAL_RADIUS, g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    c = world_to_grid_float((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    r_p = world_to_grid_float((g['x']+GOAL_RADIUS, g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     rad = int(abs(c[0]-r_p[0]))
-    c = world_to_grid((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    c = world_to_grid((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
 
     startAngle = np.arctan2(np.sin(g['angle']-g['angle_threshold']), np.cos(g['angle']-g['angle_threshold']))
     startAngle = rad_to_degrees(startAngle)
@@ -165,7 +166,7 @@ def draw_goal(g, robot_radius, local_grid):
     cv2.circle(local_grid, c, rad, [0, 100, 0], 2)
     x_a = g['x'] + (GOAL_RADIUS)*np.cos(g['angle'])
     y_a = g['y'] + (GOAL_RADIUS)*np.sin(g['angle'])
-    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+    a = world_to_grid((x_a, y_a), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     cv2.line(local_grid, c, a, [0, 100, 0], 2)
 
 
@@ -178,13 +179,13 @@ def draw_rectangular_object(canvas, c, angle, w, h, colorF, colorL):
         r_points = rotate_points(points, c, angle)
         g_points = []
         for p in r_points:
-            w_p = world_to_grid(p, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+            w_p = world_to_grid(p, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
             g_points.append([int(w_p[0]), int(w_p[1])])
         cv2.fillPoly(canvas, [np.array(g_points, np.int32)], colorF) 
         cv2.polylines(canvas, [np.array(g_points, np.int32)], True, colorL, 4) 
 
 def draw_circular_object(canvas, c, angle, w, h, colorF, colorL):
-        g_c = world_to_grid(c, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+        g_c = world_to_grid(c, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
         g_w = int(w/GRID_CELL_SIZEX)//2
         g_h = int(h/GRID_CELL_SIZEY)//2
         rot = angle*180/np.pi + 90
@@ -230,15 +231,6 @@ def draw_chair(canvas, c, angle, w, l, colorF, colorL, shape = "rectangle"):
 
         object_points.append(part_points)
 
-        # p13 = [-w / 2 + w * s2, -l / 2 + l * s2]
-        # p14 = [w / 2 - w * s2, -l / 2 + l * s2]
-        # p15 = [w / 2 - w * s2, l / 2]
-        # p16 = [-w / 2 + w * s2, l / 2]
-
-        # part_points = [p13, p14, p15, p16]
-
-        # object_points.append(part_points)
-
         im_op = []
         for op in object_points:
             pp = []
@@ -246,7 +238,7 @@ def draw_chair(canvas, c, angle, w, l, colorF, colorL, shape = "rectangle"):
                 ip = [0]*2
                 ip[0] = (c[0] - p[0] * np.sin(angle) + p[1] * np.cos(angle))
                 ip[1] = (c[1] + p[0] * np.cos(angle) + p[1] * np.sin(angle))
-                ip = world_to_grid(tuple(ip), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+                ip = world_to_grid(tuple(ip), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
                 pp.append(ip)
             im_op.append(pp)
 
@@ -317,6 +309,7 @@ for file_name in args.files:
 
     GRID_X_ORIG = data["grid"]["x_orig"]
     GRID_Y_ORIG = data["grid"]["y_orig"]
+    GRID_ANGLE_ORIG = data["grid"]["angle_orig"]
 
     global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
 
@@ -324,8 +317,8 @@ for file_name in args.files:
     for w in data["walls"]:
         p1 = (w[0], w[1])
         p2 = (w[2], w[3])
-        p1G = world_to_grid(p1, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
-        p2G = world_to_grid(p2, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG)
+        p1G = world_to_grid(p1, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+        p2G = world_to_grid(p2, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
         cv2.line(global_grid, p1G, p2G, [0, 0, 255], 8)
 
 
@@ -363,13 +356,11 @@ for file_name in args.files:
     human_colors = {}
     for s in data["sequence"]:
         local_grid = copy.deepcopy(global_grid)
-        # cv2.line(local_grid, (0, IMAGE_SIDE//2), (IMAGE_SIDE-1, IMAGE_SIDE//2), [0, 0, 0], 1)
-        # cv2.line(local_grid, (IMAGE_SIDE//2, 0),human_colors[p["id"]] (IMAGE_SIDE//2, IMAGE_SIDE-1), [0, 0, 0], 1)
 
-        # DRAW ROBOT AND GOAL
         if s["robot"]['x'] is None:
             continue
 
+        # DRAW ROBOT AND GOAL
         draw_goal(s["goal"], s["robot"]["shape"]["width"]/2, local_grid)    
         draw_robot(s["robot"], local_grid)
 
@@ -386,13 +377,6 @@ for file_name in args.files:
                 human_colors[p["id"]] = color
             draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY, (int(color[0]), int(color[1]), int(color[2])))
 
-        # # DRAW WALLS
-        # for w in s["walls"]:
-        #     p1 = (w[0], w[1])
-        #     p2 = (w[2], w[3])
-        #     p1G = world_to_grid(p1, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-        #     p2G = world_to_grid(p2, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_HEIGHT, GRID_WIDTH)
-        #     cv2.line(local_grid, p1G, p2G, [0, 0, 255], 8)
 
         visible_grid = cv2.flip(local_grid, 0)                
 
