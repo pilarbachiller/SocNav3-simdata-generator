@@ -2,6 +2,7 @@ import sys
 import json
 import fastjsonschema
 import jsbeautifier
+import numpy as np
 
 from copy import deepcopy
 
@@ -53,11 +54,23 @@ def check_grid(grid):
     :param arg: The grid structure to check.
     :type arg: grid
     '''
-    assert grid.height == len(grid.data), \
-        f"💀 The number of lines in the grid ({len(grid.data)}) doesn't match the height attribute ({grid.height})."
-    for idx, line in enumerate(grid.data):
-        assert grid.width == len(line), \
-            f"💀 The number of columns in the {idx}-th line of the grid ({len(line)}) doesn't match the width attribute ({grid.width})."
+    correct_grid_attributes = True
+
+    grid_shape = np.array(grid.data).shape
+    if grid_shape[0] != grid.height:
+        print(f"💀 The number of lines in the grid ({grid_shape[0]}) doesn't match the height attribute ({grid.height}).")
+        correct_grid_attributes = False
+    if grid_shape[1] != grid.width:
+        print(f"💀 The number of columns in the grid ({grid_shape[1]}) doesn't match the width attribute ({grid.width}).")
+        correct_grid_attributes = False
+
+    return correct_grid_attributes
+
+    # assert grid.height == len(grid.data), \
+    #     f"💀 The number of lines in the grid ({len(grid.data)}) doesn't match the height attribute ({grid.height})."
+    # for idx, line in enumerate(grid.data):
+    #     assert grid.width == len(line), \
+    #         f"💀 The number of columns in the {idx}-th line of the grid ({len(line)}) doesn't match the width attribute ({grid.width})."
 
 
 
@@ -96,6 +109,12 @@ def manage_fixes(d, e):
         d["walls"] = walls
         for i in range(len(d["sequence"])):
             del d["sequence"][i]["walls"]
+        return d
+
+    def fix__add_walls_with_zeros(d):
+        global modification_made
+        modification_made = True
+        d["walls"] = [[0.]*4]*4
         return d
 
     def fix__origin_is_centre(d):
@@ -211,6 +230,12 @@ def manage_fixes(d, e):
                     errors_fixed = 1
                 else:
                     errors_fixed = 0
+            else:
+                if is_it_yes("Do you want me to add the ['walls'] attribute filled with zeros? [Y/n]: "):
+                    d = fix__add_walls_with_zeros(d)
+                    errors_fixed = 1
+                else:
+                    errors_fixed = 0
         # Known error: The grid has no origin.
         case "data.grid must contain ['angle_orig', 'x_orig', 'y_orig'] properties":
             if is_it_yes("Do you want me to assume that the origin of the grid is the centre with, no angular offset? [Y/n]: "):
@@ -260,15 +285,28 @@ def manage_fixes(d, e):
 
     return d, errors_fixed
 
+def manage_grid_inconsistency(d):
+    if is_it_yes("Do you want me to try to fix grid attributes' inconsistencies? [Y/n]: "):
+        grid_shape = np.array(d["grid"]["data"]).shape
+        d["grid"]["height"] = grid_shape[0]
+        d["grid"]["width"] = grid_shape[1]
+        global modification_made
+        modification_made = True
+
+    return d
 
 if __name__ == "__main__":
     schema = json.load(open("schema.json", "r"))
     validator = fastjsonschema.compile(schema)
     dict_instance = json.load(open(sys.argv[1], "r"))
 
+
     do_it = True
     while do_it:
         instance = DictToObject(dict_instance)
+
+        if not check_grid(instance.grid):
+            dict_instance = manage_grid_inconsistency(dict_instance)
 
         try:
             validator(dict_instance)
@@ -282,7 +320,6 @@ if __name__ == "__main__":
                 do_it = False
 
         # These errors cannot be fixed automatically
-        check_grid(instance.grid)
         check_timestamps(instance.sequence)
 
     if modification_made:
