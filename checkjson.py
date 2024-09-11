@@ -14,6 +14,7 @@ def is_it_yes(s):
         return True
     print("")
     yn = input("😱 " + s)
+    print("")
     return yn == '' or yn[0].lower == 'y'
 
 class DictToObject:
@@ -220,6 +221,22 @@ def manage_fixes(d, e):
             d["sequence"][idx_s]["objects"] = objects_o
         return d
 
+    def fix__no_objects(d):
+        '''8. The [objects] attribute should always exist, even if it is empty.'''
+        global modification_made
+        modification_made = True
+        for idx_s in range(len(d["sequence"])):
+            d["sequence"][idx_s]["objects"] = []
+        return d
+
+    def fix__no_human_in_goal(d):
+        '''8. The [goal] attribute should always include a property called 'human'.'''
+        global modification_made
+        modification_made = True
+        for i in range(len(d["sequence"])):
+            if not 'human' in d["sequence"][i]["goal"].keys():
+                d["sequence"][i]["goal"]["human"] = None
+        return d
 
     match str(e):
         # Known error: Walls are in the sequence rather than as a global property.
@@ -282,6 +299,21 @@ def manage_fixes(d, e):
                 errors_fixed = 1
             else:
                 errors_fixed = 0
+
+        case str(x) if (x.startswith("data.sequence[") and x.endswith("] must contain ['objects'] properties")):
+            if is_it_yes("Do you want me to add the [objects] attribute with an empty list? [Y/n]: "):
+                d = fix__no_objects(d)
+                errors_fixed = 1
+            else:
+                errors_fixed = 0
+
+        case str(x) if (x.startswith("data.sequence[") and x.endswith("].goal must contain ['human'] properties")):
+            if is_it_yes("Do you want me to set the field 'human' to None in the goal property? [Y/n]: "):
+                d = fix__no_human_in_goal(d)
+                errors_fixed = 1
+            else:
+                errors_fixed = 0
+
 
     return d, errors_fixed
 

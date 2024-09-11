@@ -149,7 +149,13 @@ def draw_robot(r, local_grid):
     cv2.line(local_grid, pa1, pa2, [107, 36, 0], 2)
 
 def draw_goal(g, robot_radius, local_grid):
-    GOAL_RADIUS = robot_radius + g["pos_threshold"]
+    GOAL_RADIUS = robot_radius
+    if "pos_threhold" in g.keys():
+        GOAL_RADIUS += g["pos_threshold"]
+
+    ANGLE_THRESHOLD = 0
+    if "angle_threshold" in g.keys():
+        ANGLE_THRESHOLD += g["angle_threshold"]
 
     # DRAW GOAL
     c = world_to_grid_float((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
@@ -157,9 +163,9 @@ def draw_goal(g, robot_radius, local_grid):
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
 
-    startAngle = np.arctan2(np.sin(g['angle']-g['angle_threshold']), np.cos(g['angle']-g['angle_threshold']))
+    startAngle = np.arctan2(np.sin(g['angle']-ANGLE_THRESHOLD), np.cos(g['angle']-ANGLE_THRESHOLD))
     startAngle = rad_to_degrees(startAngle)
-    endAngle = np.arctan2(np.sin(g['angle']+g['angle_threshold']), np.cos(g['angle']+g['angle_threshold']))
+    endAngle = np.arctan2(np.sin(g['angle']+ANGLE_THRESHOLD), np.cos(g['angle']+ANGLE_THRESHOLD))
     endAngle = rad_to_degrees(endAngle)
     cv2.ellipse(local_grid, c, (rad, rad), 0, startAngle, endAngle, [0, 180, 0], -1)
 
