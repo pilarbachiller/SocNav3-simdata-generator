@@ -55,7 +55,7 @@ def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG
 
 def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG):
     tx = pW[0]-GRID_X_ORIG
-    ty = pW[1]-GRID_Y_ORIG
+    ty = -pW[1]-GRID_Y_ORIG
     rx = tx*np.cos(-GRID_ANGLE_ORIG) - ty*np.sin(-GRID_ANGLE_ORIG)
     ry = tx*np.sin(-GRID_ANGLE_ORIG) + ty*np.cos(-GRID_ANGLE_ORIG)
     pGx = rx/GRID_CELL_SIZEX 
@@ -104,22 +104,20 @@ def draw_person(p, canvas, map_multX, map_multY, color):
 
                     rotate(0, -d, a)])
     pts += offset
-    pts[:,0] = ((pts[:,0])*map_multX)+canvas.shape[0]/2
-    pts[:,1] = canvas.shape[0]/2-(-(pts[:,1])*map_multY)
-    pts = pts.reshape((1,-1,2)).astype(np.int32)
-    cv2.fillPoly(canvas, pts, color) #(20, 20, 60))
+    g_points = []
+    for p in pts.tolist():
+        w_p = world_to_grid(p, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+        g_points.append([int(w_p[0]), int(w_p[1])])
+    cv2.fillPoly(canvas, [np.array(g_points, np.int32)], color)         
 
     pts = np.array(rotate(0, 0.05, a)) + offset
-    pts[0] = ((pts[0])*map_multX)+canvas.shape[0]/2
-    pts[1] = canvas.shape[0]/2-(-(pts[1])*map_multY)
-    pts = pts.astype(np.int32)
-    cv2.circle(canvas, (pts[0], pts[1]), 7, (50,40,170), -1)
+    g_p = world_to_grid((pts[0],pts[1]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    cv2.circle(canvas, g_p, 7, (50,40,170), -1)
 
     pts = np.array(rotate(0, 0.12, a)) + offset
-    pts[0] = ((pts[0])*map_multX)+canvas.shape[0]/2
-    pts[1] = canvas.shape[0]/2-(-(pts[1])*map_multY)
-    pts = pts.astype(np.int32)
-    cv2.circle(canvas, (pts[0], pts[1]), 3, (50,40,170), -1)
+    g_p = world_to_grid((pts[0],pts[1]), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
+    cv2.circle(canvas, g_p, 3, (50,40,170), -1)
+
 
     # cv2.putText(canvas, str(p["id"]),
     # org=(pts[0], pts[1]),
@@ -314,6 +312,8 @@ for file_name in args.files:
     GRID_CELL_SIZEX = GRID_CELL_SIZE/scaleX
     GRID_CELL_SIZEY = GRID_CELL_SIZE/scaleY
 
+    # GRID_X_ORIG = data["grid"]["origin"][1] #data["grid"]["x_orig"]
+    # GRID_Y_ORIG = data["grid"]["origin"][0] #data["grid"]["y_orig"]
     GRID_X_ORIG = data["grid"]["x_orig"]
     GRID_Y_ORIG = data["grid"]["y_orig"]
     GRID_ANGLE_ORIG = data["grid"]["angle_orig"]
@@ -385,7 +385,8 @@ for file_name in args.files:
             draw_person(p, local_grid, 1./GRID_CELL_SIZEX, 1./GRID_CELL_SIZEY, (int(color[0]), int(color[1]), int(color[2])))
 
 
-        visible_grid = cv2.flip(local_grid, 0)                
+        # visible_grid = cv2.flip(local_grid, 0)              
+        visible_grid = local_grid  
 
         R = cv2.getRotationMatrix2D((visible_grid.shape[0]//2, visible_grid.shape[1]//2), args.rotate, 1.0)
         to_show = cv2.warpAffine(visible_grid, R, (visible_grid.shape[0], visible_grid.shape[1]), borderValue=(127,127,127))
