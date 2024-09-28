@@ -312,8 +312,8 @@ for file_name in args.files:
     GRID_CELL_SIZEX = GRID_CELL_SIZE/scaleX
     GRID_CELL_SIZEY = GRID_CELL_SIZE/scaleY
 
-    # GRID_X_ORIG = data["grid"]["origin"][1] #data["grid"]["x_orig"]
-    # GRID_Y_ORIG = data["grid"]["origin"][0] #data["grid"]["y_orig"]
+    # GRID_X_ORIG = data["grid"]["origin"][1]
+    # GRID_Y_ORIG = data["grid"]["origin"][0]
     GRID_X_ORIG = data["grid"]["x_orig"]
     GRID_Y_ORIG = data["grid"]["y_orig"]
     GRID_ANGLE_ORIG = data["grid"]["angle_orig"]
