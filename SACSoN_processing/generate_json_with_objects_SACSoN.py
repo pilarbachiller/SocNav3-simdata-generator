@@ -7,7 +7,9 @@ def compute_chair_attributes(x_pos, y_pos, id):
     center = np.mean(points, axis=0)
     width = np.linalg.norm(points[0]-points[1])
     height = np.linalg.norm(points[1]-points[2])
-    angle = np.arctan2((points[0][0]-points[1][0]), (points[1][1]-points[0][1]))
+    angle1 = np.arctan2((points[0][0]-points[1][0]), (points[1][1]-points[0][1]))
+    angle2 = np.arctan2((points[3][0]-points[2][0]), (points[2][1]-points[3][1]))
+    angle = (angle1+angle2)/2
 
     chair = {'id': id,
              'type': 'chair',
@@ -30,8 +32,11 @@ y_chair = [13.0, 12.4, 12.9, 13.5]
 chair = compute_chair_attributes(x_chair, y_chair, id = 1)
 objects.append(chair)
 
-x_chair = [4.35, 4.30, 11.30, 11.4]
-y_chair = [11.4, 10.9, 9.9, 10.4]
+# x_chair = [4.35, 4.30, 11.30, 11.4]
+# y_chair = [11.4, 10.9, 9.9, 10.4]
+x_chair = [4.30, 11.30, 11.4, 4.35]
+y_chair = [10.9, 9.9, 10.4, 11.4]
+
 chair = compute_chair_attributes(x_chair, y_chair, id = 2)
 objects.append(chair)
 

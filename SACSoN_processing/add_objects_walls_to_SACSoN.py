@@ -1,4 +1,5 @@
 import json
+import jsbeautifier
 import sys
 
 if len(sys.argv)<2:
@@ -13,6 +14,9 @@ for d in data['sequence']:
     d['objects'] = objects_walls['objects']
 
 with open(file_name, 'w') as f:
-    f.write(json.dumps(data))
+    options = jsbeautifier.default_options()
+    options.indent_size = 2
+    f.write(jsbeautifier.beautify(json.dumps(data), options))
+    # f.write(json.dumps(data))
     f.close()
 
