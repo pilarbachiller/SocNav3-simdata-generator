@@ -127,6 +127,15 @@ def manage_fixes(d, e):
         d["grid"]["y_orig"] = -d["grid"]["cell_size"]*d["grid"]["height"]/2
         return d
 
+    def fix__origin_from_origin_field(d):
+        '''2. No origin was specified, but it's zero?'''
+        global modification_made
+        modification_made = True
+        d["grid"]["angle_orig"] = d["grid"]["origin"][2]
+        d["grid"]["x_orig"] = d["grid"]["origin"][1]
+        d["grid"]["y_orig"] = d["grid"]["origin"][0]
+        return d
+
     def fix__move_goal_into_goal(d):
         '''3. Has the goal been included as a property of the robot?'''
         global modification_made
@@ -255,11 +264,18 @@ def manage_fixes(d, e):
                     errors_fixed = 0
         # Known error: The grid has no origin.
         case "data.grid must contain ['angle_orig', 'x_orig', 'y_orig'] properties":
-            if is_it_yes("Do you want me to assume that the origin of the grid is the centre with, no angular offset? [Y/n]: "):
-                d = fix__origin_is_centre(d)
-                errors_fixed = 1
-            else:
-                errors_fixed = 0
+            if "origin" in d["grid"].keys():
+                if is_it_yes("Do you want me to generate the origin attributes from the origin field? [Y/n]: "):
+                    d = fix__origin_from_origin_field(d)
+                    errors_fixed = 1
+                else:
+                    errors_fixed = 0
+            else:                
+                if is_it_yes("Do you want me to assume that the origin of the grid is the centre with, no angular offset? [Y/n]: "):
+                    d = fix__origin_is_centre(d)
+                    errors_fixed = 1
+                else:
+                    errors_fixed = 0
         # Known error: Goal properties are in "robot".
         case str(x) if (x.startswith("data.sequence[") and x.endswith("] must contain ['goal'] properties")):
             for ss in reversed(d["sequence"]):

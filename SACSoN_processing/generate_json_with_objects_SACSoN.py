@@ -19,6 +19,20 @@ def compute_chair_attributes(x_pos, y_pos, id):
              'shape': {'type': 'rectangle', 'width': width, 'height': height}
             }
     return chair
+
+def generate_wall_segments(x_pos, y_pos):
+    w_segments = []
+
+    x_i = x_pos[0]
+    y_i = y_pos[0]
+
+    for x_e, y_e in zip(x_pos[1:], y_pos[1:]):
+        w_segments.append([x_i, y_i, x_e, y_e])
+        x_i, y_i = x_e, y_e
+
+    return w_segments
+
+############################
     
 objects = []
 
@@ -32,8 +46,6 @@ y_chair = [13.0, 12.4, 12.9, 13.5]
 chair = compute_chair_attributes(x_chair, y_chair, id = 1)
 objects.append(chair)
 
-# x_chair = [4.35, 4.30, 11.30, 11.4]
-# y_chair = [11.4, 10.9, 9.9, 10.4]
 x_chair = [4.30, 11.30, 11.4, 4.35]
 y_chair = [10.9, 9.9, 10.4, 11.4]
 
@@ -85,8 +97,31 @@ y_chair = [5.5, 5.5, 5.2, 5.2]
 chair = compute_chair_attributes(x_chair, y_chair, id = 11)
 objects.append(chair)
 
+walls = []
+x_wall = [-6.8, -5.8, -5.8, -3.8, -3.7, -2.7, -2.7, -1.65, -1.7, -0.9, -0.95, 2.4, 2.5, 3.8, 3.7, 3.2, 3.0]
+y_wall = [0.3, 0.2, -0.4, -0.55, 0.0, -0.1, 0.55, 0.4, -0.35, -0.45, -0.75, -1.1, -0.6, -0.8, -1.5, -1.5, -3.5]
+w_segments = generate_wall_segments(x_wall, y_wall)
+walls += w_segments
+
+x_wall = [-4.5, -4.2, -0.2, -0.3]
+y_wall = [12.8, 15.2, 14.7, 13.5]
+w_segments = generate_wall_segments(x_wall, y_wall)
+walls += w_segments
+
+x_wall = [5.2, 5.1]
+y_wall = [12.6, 11.5]
+w_segments = generate_wall_segments(x_wall, y_wall)
+walls += w_segments
+
+x_wall = [12.4, 13.6]
+y_wall = [13.0, 12.8]
+w_segments = generate_wall_segments(x_wall, y_wall)
+walls += w_segments
+
+
 objects_and_walls = {}
 objects_and_walls['objects'] = objects
+objects_and_walls['walls'] = walls
 
 with open('SACSoN_objects_walls.json', 'w') as f:
     f.write(json.dumps(objects_and_walls))

@@ -13,6 +13,8 @@ objects_walls = json.load(open('SACSoN_objects_walls.json','r'))
 for d in data['sequence']:
     d['objects'] = objects_walls['objects']
 
+data['walls'] = objects_walls['walls']
+
 with open(file_name, 'w') as f:
     options = jsbeautifier.default_options()
     options.indent_size = 2
