@@ -24,4 +24,9 @@ for d in data['sequence']:
 print("number of trajectories", len(robot_trajectories))
 for i in range(len(robot_trajectories)):
     print("Length trajectory", i, ":", len(robot_trajectories[i]))
+    minx = np.min(np.array(robot_trajectories[i])[:,0])
+    maxx = np.max(np.array(robot_trajectories[i])[:,0])
+    miny = np.min(np.array(robot_trajectories[i])[:,1])
+    maxy = np.max(np.array(robot_trajectories[i])[:,1])
+    print(minx, maxx, miny, maxy)
 
