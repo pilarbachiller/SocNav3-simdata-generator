@@ -298,6 +298,7 @@ for file_name in args.files:
     GRID_WIDTH = data["grid"]["width"]
     GRID_CELL_SIZE = data["grid"]["cell_size"]
     grid = np.array(grid, np.int8)
+    print("grid shape", grid.shape)
 
     v2gray = {-1:[128, 128, 128], 0: [255, 255, 255], 1: [0, 0, 0]}
     global_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH, 3), np.uint8)
