@@ -90,12 +90,33 @@ for i in range(len(robot_trajectories)):
     grid_data["width"] = BRPGrid[0]-ULPGrid[0]+1
     grid_data["height"] = BRPGrid[1]-ULPGrid[1]+1
     np_grid = np.array(data["grid"]["data"])
-    grid_data["data"] = np_grid[ULPGrid[1]:BRPGrid[1]+1, ULPGrid[0]:BRPGrid[0]+1].tolist()
-    
+    first_row = max(0, ULPGrid[1])
+    last_row = min(data["grid"]["height"]-1, BRPGrid[1])
+    first_col = max(0, ULPGrid[0])
+    last_col = min(data["grid"]["width"]-1, BRPGrid[0])
 
-    # print("UL", ULPGrid, "BR", BRPGrid, "rows", len(grid_data["data"]), "cols",  len(grid_data["data"][0]))
+    grid_data["data"] = np_grid[first_row:last_row+1, first_col:last_col+1]
+
+    if first_row>ULPGrid[1]:
+        new_rows = np.full(((first_row-ULPGrid[1]), grid_data["data"].shape[1]), -1)
+        grid_data["data"] = np.append(new_rows, grid_data["data"], axis=0)
+
+    if last_row<BRPGrid[1]:
+        new_rows = np.full(((BRPGrid[1]-last_row), grid_data["data"].shape[1]), -1)
+        grid_data["data"] = np.append(grid_data["data"], new_rows, axis=0)
+
+    if first_col>ULPGrid[0]:
+        new_cols = np.full((grid_data["data"].shape[0], (first_col-ULPGrid[0])), -1)
+        grid_data["data"] = np.append(new_cols, grid_data["data"], axis=1)
+
+    if last_col<BRPGrid[0]:
+        new_cols = np.full((grid_data["data"].shape[0], (BRPGrid[0]-last_col)), -1)
+        grid_data["data"] = np.append(grid_data["data"], new_cols, axis=1)
+
+    grid_data["data"] = grid_data["data"].tolist()
+
     new_data["grid"] = grid_data
-    # print("grid data", new_data["grid"]["data"])    
+
     # Add walls
     walls = []
     for w in data["walls"]:
