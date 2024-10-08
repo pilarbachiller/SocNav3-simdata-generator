@@ -22,16 +22,11 @@ def grid_to_world(pGrid, gridOrigin, cellSize):
 def object_to_polygon(c, w, h, a):
     mp1 = np.array([w/2*np.sin(a), -w/2*np.cos(a)])
     mp2 = np.array([h/2*np.cos(a), h/2*np.sin(a)])
-    print("MP", mp1, mp2)
     pc = np.array(c)
     p1 = mp1 + mp2 + pc
-    print("p1",p1)
     p2 = -mp1 + mp2 + pc
-    print("p2",p2)
     p3 = -mp1 - mp2 + pc
-    print("p3",p3)
     p4 = mp1 - mp2 + pc
-    print("p4",p4)
     poly = Polygon((tuple(p1), tuple(p2), tuple(p3), tuple(p4)))
     return poly
 
@@ -61,7 +56,7 @@ print("number of trajectories", len(robot_trajectories))
 print("split slices", split_slices)
 grid_origin = [data["grid"]["x_orig"], data["grid"]["y_orig"]]
 cell_size = data["grid"]["cell_size"]
-margin = 0.
+margin = 1.
 new_data = {}
 for i in range(len(robot_trajectories)):
     print("Length trajectory", i, ":", len(robot_trajectories[i]))
@@ -127,21 +122,36 @@ for i in range(len(robot_trajectories)):
         frame["goal"]["x"] = new_p[0]
         frame["goal"]["y"] = new_p[1]
 
-        frame["objects"] = []
-        frame["people"] = []
+
+        objects = []
+        for o in d["objects"]:
+            object_poly = object_to_polygon([o["x"], o["y"]], o["shape"]["width"], o["shape"]["height"], o["angle"]) 
+            if room.contains(object_poly):
+                new_object = o
+                new_p = convert_coordinates_to_new_origin([o["x"], o["y"]], world_origin)
+                new_object["x"] = new_p[0]
+                new_object["y"] = new_p[1]
+                objects.append(new_object)
+
+        people = []
+        for p in d["people"]:
+            if room.contains(Point(p["x"], p["y"])):
+                new_person = p
+                new_p = convert_coordinates_to_new_origin([p["x"], p["y"]], world_origin)
+                new_person["x"] = new_p[0]
+                new_person["y"] = new_p[1]
+                people.append(new_person)
+
+
+        frame["objects"] = objects
+        frame["people"] = people
 
         sequence.append(frame)
     
     new_data["sequence"] = sequence
 
-    with open(file_name+"_split_"+str(i), 'w') as f:
+    output_path = '.'.join(file_name.split('.')[:-1]) + "_split_" + str(i+1) + ".json"
+    with open(output_path, 'w') as f:
         f.write(json.dumps(new_data))
         f.close()
 
-
-    # o = data["sequence"][0]["objects"][4]
-    # object_poly = object_to_polygon([o["x"], o["y"]], o["shape"]["width"], o["shape"]["height"], o["angle"])
-    # print(o)
-    # print("object polygon", object_poly)
-
-    

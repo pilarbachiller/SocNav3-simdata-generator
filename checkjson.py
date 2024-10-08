@@ -371,7 +371,8 @@ if __name__ == "__main__":
         check_timestamps(instance.sequence)
 
     if modification_made:
-        output_path = sys.argv[1]+".out"
+        output_path = '.'.join(sys.argv[1].split('.')[:-1])+"_checked.json"
+        # output_path = sys.argv[1]+".out"
         print("Saving output to:", output_path)
         with open(output_path, 'w') as f:
             options = jsbeautifier.default_options()
