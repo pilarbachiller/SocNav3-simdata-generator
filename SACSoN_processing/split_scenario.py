@@ -2,7 +2,8 @@ import json
 import jsbeautifier
 import sys
 import numpy as np
-from shapely.geometry import Polygon, Point
+import shapely
+from shapely.geometry import Polygon, LineString, Point
 
 def convert_coordinates_to_new_origin(pOld, newOrigin):
     newX = pOld[0] - newOrigin[0]
@@ -29,6 +30,18 @@ def object_to_polygon(c, w, h, a):
     p4 = mp1 - mp2 + pc
     poly = Polygon((tuple(p1), tuple(p2), tuple(p3), tuple(p4)))
     return poly
+
+def polygon_to_object(poly):
+    points = np.array(poly.exterior.coords[:-1])
+    center = np.mean(points, axis=0)
+    width = np.linalg.norm(points[0]-points[1])
+    height = np.linalg.norm(points[1]-points[2])
+    angle1 = np.arctan2((points[0][0]-points[1][0]), (points[1][1]-points[0][1]))
+    angle2 = np.arctan2((points[3][0]-points[2][0]), (points[2][1]-points[3][1]))
+    angle = (angle1+angle2)/2
+
+    return center, width, height, angle
+
 
 if len(sys.argv)<2:
     print('Please, specify the name of the JSon file')
@@ -67,7 +80,7 @@ for i in range(len(robot_trajectories)):
 
     world_origin = [(minx+maxx)/2, (miny+maxy)/2]
     side = max(abs(minx-maxx), abs(miny-maxy))
-    minPWorld = world_origin - side/2
+    minPWorld = world_origin - side/2 
     maxPWorld = world_origin + side/2
     minPGrid = world_to_grid(minPWorld, grid_origin, cell_size)
     maxPGrid = world_to_grid(maxPWorld, grid_origin, cell_size)
@@ -77,6 +90,8 @@ for i in range(len(robot_trajectories)):
     ULPGrid = [int(min(minPGrid[0], maxPGrid[0])), int(min(minPGrid[1], maxPGrid[1]))]
     BRPGrid = [int(max(minPGrid[0], maxPGrid[0])), int(max(minPGrid[1], maxPGrid[1]))]
 
+    # minPWorld = minPWorld + 0.5
+    # maxPWorld = maxPWorld - 0.5
     room = Polygon(((minPWorld[0], minPWorld[1]), (maxPWorld[0], minPWorld[1]), (maxPWorld[0], maxPWorld[1]), (minPWorld[0], maxPWorld[1])))
 
     # Create new grid
@@ -120,9 +135,10 @@ for i in range(len(robot_trajectories)):
     # Add walls
     walls = []
     for w in data["walls"]:
-        if room.contains(Point(w[0], w[1])) and room.contains(Point(w[2], w[3])):
-            new_wall_p1 = convert_coordinates_to_new_origin([w[0], w[1]], world_origin)
-            new_wall_p2 = convert_coordinates_to_new_origin([w[2], w[3]], world_origin)
+        if room.contains(Point(w[0], w[1])) or room.contains(Point(w[2], w[3])):
+            new_wall = shapely.intersection(room, LineString([(w[0], w[1]), (w[2], w[3])]))
+            new_wall_p1 = convert_coordinates_to_new_origin([new_wall.coords[0][0], new_wall.coords[0][1]], world_origin)
+            new_wall_p2 = convert_coordinates_to_new_origin([new_wall.coords[1][0], new_wall.coords[1][1]], world_origin)
             walls.append([new_wall_p1[0],new_wall_p1[1], new_wall_p2[0], new_wall_p2[1]])
 
     new_data["walls"] = walls
@@ -147,8 +163,18 @@ for i in range(len(robot_trajectories)):
         objects = []
         for o in d["objects"]:
             object_poly = object_to_polygon([o["x"], o["y"]], o["shape"]["width"], o["shape"]["height"], o["angle"]) 
-            if room.contains(object_poly):
+            inter_poly = shapely.intersection(room, object_poly)
+            if room.contains(object_poly): #not inter_poly.is_empty:
+                # print("orig", object_poly)
+                # print("inter", inter_poly)
                 new_object = o
+                # c, w, h, angle = polygon_to_object(inter_poly)
+                # new_p = convert_coordinates_to_new_origin([c[0], c[1]], world_origin)
+                # new_object["x"] = new_p[0]
+                # new_object["y"] = new_p[1]
+                # new_object["width"] = w
+                # new_object["height"] = h
+                # new_object["angle"] = angle
                 new_p = convert_coordinates_to_new_origin([o["x"], o["y"]], world_origin)
                 new_object["x"] = new_p[0]
                 new_object["y"] = new_p[1]
