@@ -65,8 +65,8 @@ def world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_
 
 def rad_to_degrees(rad):
     deg = rad*180/np.pi
-    if  deg<0:
-        deg = 360+deg
+    # if  deg<0:
+    #     deg = 360+deg
     return deg
 
 def rotate_points(points, center, angle):
@@ -164,13 +164,10 @@ def draw_goal(g, robot_radius, local_grid):
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
 
-    startAngle = np.arctan2(np.sin(g['angle']-ANGLE_THRESHOLD), np.cos(g['angle']-ANGLE_THRESHOLD))
+    startAngle = -g['angle']-ANGLE_THRESHOLD 
     startAngle = rad_to_degrees(startAngle)
-    endAngle = np.arctan2(np.sin(g['angle']+ANGLE_THRESHOLD), np.cos(g['angle']+ANGLE_THRESHOLD))
+    endAngle = -g['angle']+ANGLE_THRESHOLD 
     endAngle = rad_to_degrees(endAngle)
-    # print("startAngle", startAngle)
-    # print("endAngle", endAngle)
-    # print("angle", rad_to_degrees(g['angle']))
     cv2.ellipse(local_grid, c, (rad, rad), 0, startAngle, endAngle, [0, 180, 0], -1)
 
     cv2.circle(local_grid, c, rad, [0, 100, 0], 2)
