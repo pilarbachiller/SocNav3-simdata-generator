@@ -164,7 +164,7 @@ for i in range(len(robot_trajectories)):
         for o in d["objects"]:
             object_poly = object_to_polygon([o["x"], o["y"]], o["shape"]["width"], o["shape"]["height"], o["angle"]) 
             inter_poly = shapely.intersection(room, object_poly)
-            if room.contains(object_poly): #not inter_poly.is_empty:
+            if not inter_poly.is_empty: #room.contains(object_poly): 
                 # print("orig", object_poly)
                 # print("inter", inter_poly)
                 new_object = o
