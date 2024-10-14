@@ -3,13 +3,16 @@ import json
 import fastjsonschema
 import jsbeautifier
 import numpy as np
+import argparse
 
 from copy import deepcopy
 
 modification_made = False
 
 def is_it_yes(s):
-    if "-y" in sys.argv:
+    global fixall
+    # if "-y" in sys.argv:
+    if fixall:
         print("👍 (fixing it)")
         return True
     print("")
@@ -346,38 +349,51 @@ def manage_grid_inconsistency(d):
 if __name__ == "__main__":
     schema = json.load(open("schema.json", "r"))
     validator = fastjsonschema.compile(schema)
-    dict_instance = json.load(open(sys.argv[1], "r"))
 
+    parser = argparse.ArgumentParser(
+                        prog='checkjson',
+                        description='Check json files for SocNav3')
+    parser.add_argument('files', metavar='file', type=str, nargs="+")
+    parser.add_argument('--fixall', default=False, action='store_true', help='Fix all errors')
 
-    do_it = True
-    while do_it:
-        instance = DictToObject(dict_instance)
+    args = parser.parse_args()
 
-        if not check_grid(instance.grid):
-            dict_instance = manage_grid_inconsistency(dict_instance)
+    global fixall
+    fixall = args.fixall
 
-        try:
-            validator(dict_instance)
-            do_it = False
-            print("Correct.")
-        except fastjsonschema.JsonSchemaException as e:
-            print(f"Data failed validation: {e}")
+    for input_file in args.files:
 
-            dict_instance, errors_fixed = manage_fixes(dict_instance, e)
-            if errors_fixed == 0:
+        with open(input_file, "r") as f:
+            dict_instance = json.load(f)
+
+        print('Checking file', input_file)
+        do_it = True
+        while do_it:
+            instance = DictToObject(dict_instance)
+
+            if not check_grid(instance.grid):
+                dict_instance = manage_grid_inconsistency(dict_instance)
+
+            try:
+                validator(dict_instance)
                 do_it = False
+                print("Correct.")
+            except fastjsonschema.JsonSchemaException as e:
+                print(f"Data failed validation: {e}")
 
-        # These errors cannot be fixed automatically
-        check_timestamps(instance.sequence)
+                dict_instance, errors_fixed = manage_fixes(dict_instance, e)
+                if errors_fixed == 0:
+                    do_it = False
 
-    if modification_made:
-        output_path = '.'.join(sys.argv[1].split('.')[:-1])+"_checked.json"
-        # output_path = sys.argv[1]+".out"
-        print("Saving output to:", output_path)
-        with open(output_path, 'w') as f:
-            options = jsbeautifier.default_options()
-            options.indent_size = 2
-            f.write(jsbeautifier.beautify(json.dumps(dict_instance), options))
+            # These errors cannot be fixed automatically
+            check_timestamps(instance.sequence)
 
-        # json.dump(dict_instance, open(output_path, "w"))
+        if modification_made:
+            output_path = '.'.join(input_file.split('.')[:-1])+"_checked.json"
+            print("Saving output to:", output_path)
+            with open(output_path, 'w') as f:
+                options = jsbeautifier.default_options()
+                options.indent_size = 2
+                f.write(jsbeautifier.beautify(json.dumps(dict_instance), options))
+
 
