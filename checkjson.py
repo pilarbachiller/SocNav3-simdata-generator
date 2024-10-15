@@ -84,19 +84,25 @@ def check_timestamps(sequence):
     :param arg: The sequence of snapshots to check.
     :type arg: list
     '''
+    correct_order = True
     low_frequency = 0
     for idx, ss in enumerate(sequence):
         if idx == 0:
             last_timestamp = ss.timestamp
         else:
-            assert ss.timestamp > last_timestamp, \
-                f"💀 {idx}-th timestamp out of order. Timestamp {last_timestamp}, then {ss.timestamp}."
+            if ss.timestamp <= last_timestamp:
+                correct_order = False
+                print(f"💀 {idx}-th timestamp out of order. Timestamp {last_timestamp}, then {ss.timestamp}.")
+            # assert ss.timestamp > last_timestamp, \
+            #     f"💀 {idx}-th timestamp out of order. Timestamp {last_timestamp}, then {ss.timestamp}."
             if ss.timestamp >= 0.5 + last_timestamp:
                 low_frequency += 1
             last_timestamp = ss.timestamp
 
     if low_frequency > 0:
         print(f"🤨 Warning: Found samples where the timestep was too long, {low_frequency} out of {len(sequence)}.")
+    
+    print(correct_order)
 
 
 def manage_fixes(d, e):
@@ -346,6 +352,25 @@ def manage_grid_inconsistency(d):
 
     return d
 
+def manage_timestamp_inconsistency(d):
+
+    if is_it_yes("Do you want me to out of order items of the sequence? [Y/n]: "):
+        new_sequence = []
+        for idx, ss in enumerate(d["sequence"]):
+            if idx == 0:
+                last_timestamp = ss["timestamp"]
+            else:
+                if ss["timestamp"] > last_timestamp:
+                    new_sequence.append(ss)
+            last_timestamp = ss["timestamp"]
+        
+        d["sequence"] = new_sequence
+        global modification_made
+        modification_made = True
+
+    return d
+
+
 if __name__ == "__main__":
     schema = json.load(open("schema.json", "r"))
     validator = fastjsonschema.compile(schema)
@@ -362,7 +387,11 @@ if __name__ == "__main__":
     fixall = args.fixall
 
     for input_file in args.files:
+        modification_made = False        
 
+        if input_file.endswith("_checked.json"):
+            continue
+            
         with open(input_file, "r") as f:
             dict_instance = json.load(f)
 
@@ -385,8 +414,8 @@ if __name__ == "__main__":
                 if errors_fixed == 0:
                     do_it = False
 
-            # These errors cannot be fixed automatically
-            check_timestamps(instance.sequence)
+            if not check_timestamps(instance.sequence):
+                dict_instance = manage_timestamp_inconsistency(dict_instance)
 
         if modification_made:
             output_path = '.'.join(input_file.split('.')[:-1])+"_checked.json"
