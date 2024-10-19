@@ -367,8 +367,8 @@ for file_name in args.files:
     for s in data["sequence"]:
         local_grid = copy.deepcopy(global_grid)
 
-        if s["robot"]['x'] is None:
-            continue
+        # if s["robot"]['x'] is None:
+        #     continue
 
         # DRAW ROBOT AND GOAL
         draw_goal(s["goal"], s["robot"]["shape"]["width"]/2, local_grid)    
