@@ -80,14 +80,14 @@
                   "width": {
                     "type": "number"
                   },
-                  "height": {
+                  "length": {
                     "type": "number"
                   }
                 },
                 "required": [
                   "type",
                   "width",
-                  "height"
+                  "length"
                 ]
               },
               "x": {
@@ -208,14 +208,14 @@
                     "width": {
                       "type": "number"
                     },
-                    "height": {
+                    "length": {
                       "type": "number"
                     }
                   },
                   "required": [
                     "type",
                     "width",
-                    "height"
+                    "length"
                   ]
                 }
               },

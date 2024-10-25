@@ -258,7 +258,7 @@ def draw_chair(canvas, c, angle, w, l, colorF, colorL, shape = "rectangle"):
 
 def draw_object(o, canvas):
     w = o["shape"]["width"]
-    h = o["shape"]["height"] 
+    h = o["shape"]["length"] 
     if o["type"] == "table":
         cF = (63,133,205)
         cL = (23,93,165)

@@ -102,7 +102,7 @@ def check_timestamps(sequence):
     if low_frequency > 0:
         print(f"🤨 Warning: Found samples where the timestep was too long, {low_frequency} out of {len(sequence)}.")
     
-    print(correct_order)
+    return correct_order
 
 
 def manage_fixes(d, e):
@@ -180,7 +180,7 @@ def manage_fixes(d, e):
             shape = {
                     "type": "circle",
                     "width": robot["radius"]*2,
-                    "height": robot["radius"]*2
+                    "length": robot["radius"]*2
                 }
             del d["sequence"][i]["robot"]["radius"]
             d["sequence"][i]["robot"]["shape"] = shape
@@ -248,13 +248,35 @@ def manage_fixes(d, e):
         return d
 
     def fix__no_human_in_goal(d):
-        '''8. The [goal] attribute should always include a property called 'human'.'''
+        '''9. The [goal] attribute should always include a property called 'human'.'''
         global modification_made
         modification_made = True
         for i in range(len(d["sequence"])):
             if not 'human' in d["sequence"][i]["goal"].keys():
                 d["sequence"][i]["goal"]["human"] = None
         return d
+
+    def fix__replace_robot_height_with_length(d):
+        '''10. Replace robot.height with robot.length.'''
+        global modification_made
+        modification_made = True
+        for i in range(len(d["sequence"])):
+            d["sequence"][i]["robot"]["shape"]["length"] = d["sequence"][i]["robot"]["shape"]["height"]
+            del d["sequence"][i]["robot"]["shape"]["height"]
+
+        return d
+
+    def fix__replace_objects_height_with_length(d):
+        '''10. Replace object.height with objects.length.'''
+        global modification_made
+        modification_made = True
+        for i in range(len(d["sequence"])):
+            for o in range(len(d["sequence"][i]["objects"])):
+                d["sequence"][i]["objects"][o]["shape"]["length"] = d["sequence"][i]["objects"][o]["shape"]["height"]
+                del d["sequence"][i]["objects"][o]["shape"]["height"]
+
+        return d
+
 
     match str(e):
         # Known error: Walls are in the sequence rather than as a global property.
@@ -339,6 +361,22 @@ def manage_fixes(d, e):
             else:
                 errors_fixed = 0
 
+        case str(x) if (x.startswith("data.sequence[") and x.endswith("].robot.shape must contain ['length'] properties")):
+            if is_it_yes("Do you want me to replace the height property of the robot with the length property? [Y/n]: "):
+                d = fix__replace_robot_height_with_length(d)
+                errors_fixed = 1
+            else:
+                errors_fixed = 0
+
+        case str(x) if (x.startswith("data.sequence[") and x.endswith("shape must contain ['length'] properties")) and "objects" in x:
+            if is_it_yes("Do you want me to replace the height property of the objects with the length property? [Y/n]: "):
+                d = fix__replace_objects_height_with_length(d)
+                errors_fixed = 1
+            else:
+                errors_fixed = 0
+
+# data.sequence[0].objects[0].shape must contain ['length'] properties        
+
 
     return d, errors_fixed
 
@@ -354,7 +392,7 @@ def manage_grid_inconsistency(d):
 
 def manage_timestamp_inconsistency(d):
 
-    if is_it_yes("Do you want me to out of order items of the sequence? [Y/n]: "):
+    if is_it_yes("Do you want me to remove out of order items of the sequence? [Y/n]: "):
         new_sequence = []
         for idx, ss in enumerate(d["sequence"]):
             if idx == 0:
