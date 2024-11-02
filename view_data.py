@@ -144,8 +144,11 @@ def draw_robot(r, local_grid):
     r_p = world_to_grid_float((r['x']+ROBOT_RADIUS, r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
     rad = int(abs(c[0]-r_p[0]))
     c = world_to_grid((r['x'], r['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
-    cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
-    cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
+    if r["shape"]["type"] == "circle":
+        cv2.circle(local_grid, c, rad, [252, 220, 202], -1)
+        cv2.circle(local_grid, c, rad, [107, 36, 0], 2)
+    else:
+        draw_rectangular_object(local_grid, (r['x'], r['y']), r['angle'], r['shape']['width'], r['shape']['length'], [252, 220, 202], [107, 36, 0])
     cv2.line(local_grid, c, a, [107, 36, 0], 2)
     cv2.line(local_grid, pa1, pa2, [107, 36, 0], 2)
 
@@ -318,10 +321,11 @@ for file_name in args.files:
     # GRID_X_ORIG = data["grid"]["origin"][1]
     # GRID_Y_ORIG = data["grid"]["origin"][0]
     GRID_X_ORIG = data["grid"]["x_orig"]
-    GRID_Y_ORIG = data["grid"]["y_orig"]
+    GRID_Y_ORIG = data["grid"]["y_orig"] # -data["grid"]["height"]*data["grid"]["cell_size"]
     GRID_ANGLE_ORIG = data["grid"]["angle_orig"]
 
     global_grid = cv2.resize(global_grid, (GRID_HEIGHT, GRID_WIDTH))
+    # global_grid = cv2.flip(global_grid, 0)              
 
     # DRAW WALLS
     for w in data["walls"]:

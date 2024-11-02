@@ -16,7 +16,7 @@ def compute_chair_attributes(x_pos, y_pos, id):
              'x': center[0],
              'y': center[1],
              'angle': angle,
-             'shape': {'type': 'rectangle', 'width': width, 'height': height}
+             'shape': {'type': 'rectangle', 'width': width, 'length': height}
             }
     return chair
 
@@ -77,8 +77,8 @@ y_chair = [8.2, 8.7, 8.3, 7.9]
 chair = compute_chair_attributes(x_chair, y_chair, id = 7)
 objects.append(chair)
 
-x_chair = [6.65, 6.75, 6.0, 5.6]
-y_chair = [8.65, 8.2, 7.5, 7.7]
+x_chair = [6.75, 6.0, 5.6, 6.65]
+y_chair = [8.2, 7.5, 7.7, 8.65]
 chair = compute_chair_attributes(x_chair, y_chair, id = 8)
 objects.append(chair)
 
@@ -87,8 +87,8 @@ y_chair = [7.5, 6.4, 6.3, 7.6]
 chair = compute_chair_attributes(x_chair, y_chair, id = 9)
 objects.append(chair)
 
-x_chair = [5.5, 5.9, 6.4, 6.2] 
-y_chair = [6.5, 6.5, 5.5, 5.2] 
+x_chair = [5.9, 6.4, 6.2, 5.5] 
+y_chair = [6.5, 5.5, 5.2, 6.5] 
 chair = compute_chair_attributes(x_chair, y_chair, id = 10)
 objects.append(chair)
 

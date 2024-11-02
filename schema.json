@@ -187,7 +187,7 @@
                 },
                 "type": {
                   "type": "string",
-                  "enum": ["chair", "table", "plant", "tv", "shelf"]
+                  "enum": ["chair", "table", "plant", "tv", "shelf", "floor_lamp"]
                 },
                 "x": {
                   "type": "number"
