@@ -1,6 +1,8 @@
 import sys
 import time
 import json
+import multiprocessing
+
 import fastjsonschema
 import jsbeautifier
 import numpy as np
@@ -425,11 +427,11 @@ if __name__ == "__main__":
     global fixall
     fixall = args.fixall
 
-    for input_file in args.files:
+    def do_it(input_file):
         modification_made = False        
 
         if input_file.endswith("_checked.json"):
-            continue
+            return
             
         with open(input_file, "r") as f:
             dict_instance = json.load(f)
@@ -459,12 +461,12 @@ if __name__ == "__main__":
             if not check_timestamps(instance.sequence):
                 dict_instance = manage_timestamp_inconsistency(dict_instance)
 
-        if modification_made:
-            output_path = '.'.join(input_file.split('.')[:-1])+"_checked.json"
-            print("Saving output to:", output_path)
-            with open(output_path, 'w') as f:
-                options = jsbeautifier.default_options()
-                options.indent_size = 2
-                f.write(jsbeautifier.beautify(json.dumps(dict_instance), options))
+        output_path = '.'.join(input_file.split('.')[:-1])+"_checked.json"
+        print("Saving output to:", output_path)
+        with open(output_path, 'w') as f:
+            options = jsbeautifier.default_options()
+            options.indent_size = 2
+            f.write(jsbeautifier.beautify(json.dumps(dict_instance), options))
 
-
+    with multiprocessing.Pool(10) as pool:
+        results = pool.map(do_it, args.files)
