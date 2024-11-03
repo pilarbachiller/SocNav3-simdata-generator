@@ -15,6 +15,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# e.g.
+# python3 view_data.py 2024-08-07T16-28-38_trj_checked.json --videowidth 1400 --videoheight 1400 --leftcrop 180 --rightcrop 430 --topcrop 170 --bottomcrop 520  --rotate 59.5 --ffwd --novideo
+#
+#
 
 import time, sys, os
 from turtle import width
@@ -40,6 +44,8 @@ parser.add_argument('--rotate', type=float, nargs="?", default=0., help='how muc
 parser.add_argument('--videowidth', type=int, help='video width', required=True)
 parser.add_argument('--videoheight', type=int, help='video height', required=True)
 parser.add_argument('--dir', type=str, nargs="?", default="./videos", help="output directory for the generated videos")
+parser.add_argument('--novideo', type=bool, nargs="?", default=False, help='avoid generating a video file')
+parser.add_argument('--ffwd', type=bool, nargs="?", default=False, help='play as fast as possible')
 
 
 args = parser.parse_args()
@@ -401,7 +407,8 @@ for file_name in args.files:
 
         to_show = to_show[tcrop:-bcrop-1,lcrop:-rcrop-1]
 
-        images_for_video.append(to_show)
+        if args.novideo is False:
+            images_for_video.append(to_show)
         cv2.imshow("grid", to_show)
         k = cv2.waitKey(1)
         if k==27:
@@ -411,14 +418,16 @@ for file_name in args.files:
         if last_timestamp == -1:
             sleeptime = 0
         last_timestamp = s["timestamp"]
-        time.sleep(sleeptime)
+        if args.ffwd is False:
+            time.sleep(sleeptime)
 
-    ini_episode = data["sequence"][0]["timestamp"]
-    end_episode = data["sequence"][-1]["timestamp"]
-    fps = len(images_for_video)/(end_episode-ini_episode)
-    fourcc =  cv2.VideoWriter_fourcc(*'MP4V')
-    output_file = file_name.split("/")[-1].split(".")[0] + ".mp4"
-    writer = cv2.VideoWriter(os.path.join(output_dir, output_file), fourcc, fps, (images_for_video[0].shape[1], images_for_video[0].shape[0])) 
-    for image in images_for_video:
-        writer.write(image)
-    writer.release()
+    if args.novideo is False:
+        ini_episode = data["sequence"][0]["timestamp"]
+        end_episode = data["sequence"][-1]["timestamp"]
+        fps = len(images_for_video)/(end_episode-ini_episode)
+        fourcc =  cv2.VideoWriter_fourcc(*'MP4V')
+        output_file = file_name.split("/")[-1].split(".")[0] + ".mp4"
+        writer = cv2.VideoWriter(os.path.join(output_dir, output_file), fourcc, fps, (images_for_video[0].shape[1], images_for_video[0].shape[0])) 
+        for image in images_for_video:
+            writer.write(image)
+        writer.release()
