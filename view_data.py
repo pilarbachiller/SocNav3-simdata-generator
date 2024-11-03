@@ -47,13 +47,15 @@ parser.add_argument('--dir', type=str, nargs="?", default="./videos", help="outp
 parser.add_argument('--novideo', type=bool, nargs="?", default=False, help='avoid generating a video file')
 parser.add_argument('--ffwd', type=bool, nargs="?", default=False, help='play as fast as possible')
 
+read_goal = None
 
 args = parser.parse_args()
 
 output_dir = args.dir
 if not os.path.isdir(output_dir):
     os.mkdir(output_dir)
-print("Videos will be saved in", output_dir)
+if args.novideo is False:
+    print("Videos will be saved in", output_dir)
 
 def world_to_grid(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG):
     pGx, pGy = world_to_grid_float(pW, GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
@@ -166,6 +168,13 @@ def draw_goal(g, robot_radius, local_grid):
     ANGLE_THRESHOLD = 0
     if "angle_threshold" in g.keys():
         ANGLE_THRESHOLD += g["angle_threshold"]
+
+    global read_goal
+    if read_goal is None or (abs(read_goal["x"]<=1e-5) and abs(read_goal["y"]<=1e-5) and abs(read_goal["angle"]<=1e-5)):
+        read_goal = g
+    elif g != read_goal:
+        print(f"Change detected in {args.files}")
+        read_goal = g
 
     # DRAW GOAL
     c = world_to_grid_float((g['x'], g['y']), GRID_CELL_SIZEX, GRID_CELL_SIZEY, GRID_X_ORIG, GRID_Y_ORIG, GRID_ANGLE_ORIG)
@@ -301,7 +310,7 @@ def draw_object(o, canvas):
 
 for file_name in args.files:
 
-    print(file_name)
+    # print(file_name)
 
     data = json.load(open(file_name, 'r'))
     grid = data["grid"]["data"]
@@ -309,7 +318,7 @@ for file_name in args.files:
     GRID_WIDTH = data["grid"]["width"]
     GRID_CELL_SIZE = data["grid"]["cell_size"]
     grid = np.array(grid, np.int8)
-    print("grid shape", grid.shape)
+    # print("grid shape", grid.shape)
 
     v2gray = {-1:[128, 128, 128], 0: [255, 255, 255], 1: [0, 0, 0]}
     global_grid = np.zeros((GRID_HEIGHT, GRID_WIDTH, 3), np.uint8)
