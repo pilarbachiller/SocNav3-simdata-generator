@@ -1,4 +1,5 @@
 import sys
+import time
 import json
 import fastjsonschema
 import jsbeautifier
@@ -433,6 +434,7 @@ if __name__ == "__main__":
         with open(input_file, "r") as f:
             dict_instance = json.load(f)
 
+        t = time.time()
         print('Checking file', input_file)
         do_it = True
         while do_it:
@@ -447,11 +449,13 @@ if __name__ == "__main__":
                 print("Correct.")
             except fastjsonschema.JsonSchemaException as e:
                 print(f"Data failed validation: {e}")
-
                 dict_instance, errors_fixed = manage_fixes(dict_instance, e)
                 if errors_fixed == 0:
                     do_it = False
-
+                if time.time() - t > 600:
+                    print(f"Skipping {input_file} because it's taking ages...")
+                    modification_made = False
+                    break
             if not check_timestamps(instance.sequence):
                 dict_instance = manage_timestamp_inconsistency(dict_instance)
 
