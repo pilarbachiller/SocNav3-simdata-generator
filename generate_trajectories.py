@@ -203,7 +203,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj["shape"] = {}
             obj["shape"]["type"] = "rectangle"
             obj["shape"]["width"] = o.width
-            obj["shape"]["height"] = o.length
+            obj["shape"]["length"] = o.length
             if o in self.env.laptops:
                 obj["type"] = "laptop"
             elif o in self.env.tables:
@@ -220,7 +220,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
             obj["shape"] = {}
             obj["shape"]["type"] = "circle"
             obj["shape"]["width"] = o.radius*2
-            obj["shape"]["height"] = o.radius*2
+            obj["shape"]["length"] = o.radius*2
             obj["type"] = "plant"
             objects.append(obj)
 
@@ -268,7 +268,7 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
                 obj["angle"] = laptop.orientation
                 obj["shape"]["type"] = "rectangle"
                 obj["shape"]["width"] = laptop.width
-                obj["shape"]["height"] = laptop.length
+                obj["shape"]["length"] = laptop.length
                 obj["type"] = "laptop"
                 objects.append(obj)
 
@@ -283,14 +283,14 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         robot["shape"] = {}
         robot["shape"]["type"] = "circle"
         robot["shape"]["width"] = self.env.ROBOT_RADIUS*2
-        robot["shape"]["height"] = self.env.ROBOT_RADIUS*2
+        robot["shape"]["length"] = self.env.ROBOT_RADIUS*2
 
         goal = {}
         goal["x"] = self.env.robot.goal_x
         goal["y"] = self.env.robot.goal_y
-        goal["angle"] = 0
+        goal["angle"] = self.env.robot.goal_a
         goal["pos_threshold"] = self.env.GOAL_RADIUS
-        goal["angle_threshold"] = np.pi
+        goal["angle_threshold"] = self.env.GOAL_ORIENTATION_THRESHOLD
         goal["type"] = "go-to"
         goal["human"] = None
 

@@ -10,8 +10,10 @@ episode:
 robot:
     robot_radius: 0.3  # radius of the robot
     robot_radius_margin: 0.1  # radius margin of the robot
-    goal_radius: 0.15  # radius of the goal
+    goal_radius: 0.25  # radius of the goal
     goal_radius_margin: 0.05  # radius margin of the goal
+    min_goal_orientation_threshold: 0.5
+    max_goal_orientation_threshold: 1.
     robot_type: "diff-drive"  # there are two types, diff-drive or holonomic
 
 human:
