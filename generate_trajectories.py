@@ -12,7 +12,7 @@ from mainUI import Ui_MainWindow
 
 sys.path.append(os.path.join(os.path.dirname(__file__),'../SocNavGym'))
 import socnavgym
-import gym
+import gymnasium as gym
 
 SHOW_GRID = False
 OBJECTS_IN_GRID = False
@@ -35,7 +35,8 @@ class MainWindow(QtWidgets.QWidget, Ui_MainWindow):
         self.images_for_video = list()
         self.data = list()
 
-        self.env = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
+        self.gymEnv = gym.make("SocNavGym-v1", config="socnavgym_conf.yaml")
+        self.env = self.gymEnv.unwrapped
         self.simulation_time = 0
         self.last_save_simulation_time = -1
         self.n_steps = 0
