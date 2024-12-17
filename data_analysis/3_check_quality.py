@@ -5,13 +5,14 @@ import copy
 from sklearn import metrics as sk
 import pandas as pd
 import seaborn as sns
+import pingouin as pg
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from collections import namedtuple
 
-Response = namedtuple('Response', ['id', 'keys', 'values', 'rep_keys', 'rep_values', 'rep2_keys', 'rep2_values'])
+Response = namedtuple('Response', ['id', 'total_scores', 'keys', 'values', 'rep_keys', 'rep_values', 'rep2_keys', 'rep2_values'])
 
 JSON_DIR = '.'
 
@@ -109,7 +110,7 @@ def get_responses():
                                     print("WRONG INDEX IN REP DATA!!!", data["indices"][int(k)], data["indices"][int(k2)], file_path)
 
 
-                    r = Response(id=file_path, keys=keys, values=values, rep_keys=rep_keys, rep_values=rep_values, rep2_keys=rep2_keys, rep2_values=rep2_values)
+                    r = Response(id=file_path, total_scores=len(data["answers"]), keys=keys, values=values, rep_keys=rep_keys, rep_values=rep_values, rep2_keys=rep2_keys, rep2_values=rep2_values)
                     responses.append(r)
                     total_surveys += 1
                     total_answers += len(data["answers"])
@@ -171,6 +172,12 @@ def get_values_from_responses(responses):
         matrix[response_idx,:] = response.values[:MIN_RELEVANT]
     return matrix
 
+def get_total_number_of_scores(responses):
+    t = 0
+    for response in responses:
+        t += response.total_scores
+    return t
+
 def get_consistency_matrix(responses):
     matrix = np.ndarray((len(responses), len(responses)), dtype=float)
     for i1, p1 in enumerate(responses):
@@ -183,6 +190,19 @@ def get_consistency_matrix(responses):
                 val2 = p2.values[:MIN_RELEVANT]
             matrix[i1, i2] = sk.cohen_kappa_score(val2, val1, labels=list(range(101)), weights='quadratic')
     return matrix
+
+def get_icc(responses):
+    participants = ['p'+str(p) for p in range(len(responses))]
+    data = {'Participant': participants}
+    keys = responses[0].keys[:MIN_RELEVANT]
+    for i, k in enumerate(keys):
+        scores = [r.values[i] for r in responses]
+        data['Q'+str(k)] = scores
+
+    df_icc = pd.DataFrame(data)
+    df_long = df_icc.melt(id_vars=['Participant'], var_name='Question', value_name='Rating')
+    icc_result = pg.intraclass_corr(data=df_long, targets='Question', raters='Participant', ratings='Rating')
+    print(icc_result)
 
 if __name__ == "__main__":
     print("Responses length:", MIN_RELEVANT)
@@ -200,12 +220,22 @@ if __name__ == "__main__":
     plt.title("Raters' consistency")
     plt.show()
 
+
+
+    tscores_before = get_total_number_of_scores(valid_responses)
+
     valid_responses_after_inconsistency_test = []
     for p, r in enumerate(valid_responses):
-        if consistency_matrix[p,p] > 0.2:
+        if consistency_matrix[p,p] > 0.4:
             valid_responses_after_inconsistency_test.append(r)
         else:
             print(f'{r.id} ({raters[p]}) removed from valid responses')
+
+    tscores_after = get_total_number_of_scores(valid_responses_after_inconsistency_test)
+
+    get_icc(valid_responses_after_inconsistency_test)
+
+    print(f'Initial and final number of scores: {tscores_before} {tscores_after}' )
 
     valid_responses = valid_responses_after_inconsistency_test
     values = get_values_from_responses(valid_responses)
